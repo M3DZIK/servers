@@ -4,3 +4,7 @@
 # Plugins
 /plugins
 *.so
+
+# IDEs
+.vscode
+.idea
