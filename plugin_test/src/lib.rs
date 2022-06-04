@@ -1,5 +1,7 @@
 use async_trait::async_trait;
-use servers::{Client, Command, CommandManagerType, CommandRegistrar, Plugin, PluginRegistrar};
+use servers::{
+    tcp::Client, Command, CommandManagerType, CommandRegistrar, Plugin, PluginRegistrar,
+};
 
 struct PluginTest;
 

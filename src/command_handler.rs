@@ -2,7 +2,7 @@ use std::{any::Any, sync::Arc};
 
 use async_trait::async_trait;
 
-use crate::Client;
+use crate::tcp::Client;
 
 #[async_trait]
 pub trait Command: Any + Send + Sync {
