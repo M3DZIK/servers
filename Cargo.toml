@@ -1,0 +1,11 @@
+[package]
+name = "servers"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.57"
+async-trait = "0.1.56"
+libloading = "0.7.3"
+log = "0.4.17"
+tokio = { version = "1.19.0", features = ["rt-multi-thread", "macros", "net", "io-std", "io-util"] }
