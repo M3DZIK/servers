@@ -1,3 +1,6 @@
+[workspace]
+members = ["plugin_test"]
+
 [package]
 name = "servers"
 version = "0.1.0"

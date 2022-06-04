@@ -17,18 +17,28 @@ impl Client {
 
     /// Read message/buffer from Client
     pub async fn read(&mut self) -> anyhow::Result<String> {
+        // allocate an empty buffer of length 1024 bytes
         let mut buf = [0; 1024];
 
+        // read buffer from stream
         self.stream.read(&mut buf).await?;
 
-        let encoded = String::from_utf8(buf.to_vec())?.replace('\0', "");
+        // encode &[u8] to a String and replace null spaces (empty `\0` bytes)
+        let decoded = String::from_utf8(buf.to_vec())?.replace('\0', "");
 
-        Ok(encoded)
+        Ok(decoded)
     }
 
     /// Send message to Client
     pub async fn send(&mut self, content: &str) -> anyhow::Result<()> {
-        self.stream.write_all(format!("{content}\n\r").as_bytes()).await?;
+        // add a new line at the end of the content
+        let content = format!("{content}\n\r");
+
+        // send message
+        self.stream
+            .write_all(content.as_bytes())
+            .await?;
+
         Ok(())
     }
 }

@@ -2,21 +2,16 @@ use std::{any::Any, sync::Arc};
 
 use async_trait::async_trait;
 
-use crate::{Client, commands};
+use crate::Client;
 
 #[async_trait]
 pub trait Command: Any + Send + Sync {
     /// Command name
     fn name(&self) -> &'static str;
-    /// Command help message
+    /// Help message of this command
     fn help(&self) -> &'static str;
     /// Command function
-    async fn execute(
-        &self,
-        client: &mut Client,
-        args: Vec<&str>,
-        plugins: &CommandManagerType,
-    );
+    async fn execute(&self, client: &mut Client, args: Vec<&str>, commands: &CommandManagerType);
 }
 
 pub struct CommandManager {
@@ -38,20 +33,4 @@ impl Default for CommandManager {
     }
 }
 
-pub type CommandManagerType = Vec<Arc<Box<dyn Command>>>;
-
-pub fn register_commands() -> CommandManagerType {
-    let mut command_manager = CommandManager::new();
-
-    for command in commands::register_commands() {
-        command_manager.commands.push(command)
-    }
-
-    // create Arc in Vector
-    let mut commands: CommandManagerType = Vec::new();
-    for command in command_manager.commands {
-        commands.push(Arc::new(command))
-    }
-
-    commands
-}
+pub type CommandManagerType = Arc<Vec<Box<dyn Command>>>;

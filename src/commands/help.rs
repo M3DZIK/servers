@@ -20,7 +20,7 @@ impl Command for CommandHelp {
         _args: Vec<&str>,
         commands: &CommandManagerType,
     ) {
-        for command in commands {
+        for command in commands.iter() {
             client
                 .send(&format!("{} - {}", command.name(), command.help()))
                 .await
