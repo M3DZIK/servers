@@ -27,6 +27,7 @@ struct Cli {
 }
 
 fn main() -> anyhow::Result<()> {
+    // init logger
     SimpleLogger::new().init()?;
 
     // parse cli args

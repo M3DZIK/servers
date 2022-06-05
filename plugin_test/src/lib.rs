@@ -35,5 +35,5 @@ impl Command for PluginTest {
 #[no_mangle]
 pub fn plugin_entry(registrar: &mut dyn PluginRegistrar, command: &mut dyn CommandRegistrar) {
     registrar.register_plugin(Box::new(PluginTest));
-    command.register_plugin(Box::new(PluginTest));
+    command.register_command(Box::new(PluginTest));
 }

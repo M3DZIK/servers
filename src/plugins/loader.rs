@@ -19,6 +19,18 @@ pub trait Plugin: Any + Send + Sync {
     async fn on_plugin_unload(&self);
 }
 
+pub trait PluginRegistrar {
+    /// Function to register the plugin
+    fn register_plugin(&mut self, plugin: Box<dyn Plugin>);
+}
+
+impl PluginRegistrar for PluginManager {
+    fn register_plugin(&mut self, plugin: Box<dyn Plugin>) {
+        self.plugins.push(plugin)
+    }
+}
+
+/// Plugin Manager
 pub struct PluginManager {
     pub plugins: Vec<Box<dyn Plugin>>,
 }
@@ -38,15 +50,7 @@ impl Default for PluginManager {
     }
 }
 
-pub trait PluginRegistrar {
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>);
-}
-
-impl PluginRegistrar for PluginManager {
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>) {
-        self.plugins.push(plugin)
-    }
-}
+pub type PluginManagerType = Arc<PluginManager>;
 
 #[async_trait]
 pub trait Command: Any + Send + Sync {
@@ -63,12 +67,13 @@ pub trait Command: Any + Send + Sync {
     );
 }
 
+/// Command Manager
 pub struct CommandManager {
-    /// Vector with plugins
     pub commands: Vec<Box<dyn Command>>,
 }
 
 impl CommandManager {
+    /// Create empty `CommandManager`
     pub fn new() -> Self {
         Self {
             commands: Vec::new(),
@@ -76,25 +81,27 @@ impl CommandManager {
     }
 }
 
-pub type CommandManagerType = Arc<CommandManager>;
-
 impl Default for CommandManager {
     fn default() -> Self {
         Self::new()
     }
 }
 
+pub type CommandManagerType = Arc<CommandManager>;
+
 pub trait CommandRegistrar {
-    fn register_plugin(&mut self, command: Box<dyn Command>);
+    /// Function to register the plugin and the commands in the plugin
+    fn register_command(&mut self, command: Box<dyn Command>);
 }
 
 impl CommandRegistrar for CommandManager {
-    fn register_plugin(&mut self, command: Box<dyn Command>) {
+    fn register_command(&mut self, command: Box<dyn Command>) {
         self.commands.push(command)
     }
 }
 
-pub fn loader() -> anyhow::Result<(Arc<CommandManager>, Arc<PluginManager>)> {
+/// Plugins and Commands loader
+pub fn loader() -> anyhow::Result<(CommandManagerType, PluginManagerType)> {
     // get path to .so lib from command argument
     let config_dir = "./plugins";
     let paths = fs::read_dir(config_dir)?;
@@ -138,5 +145,6 @@ pub fn loader() -> anyhow::Result<(Arc<CommandManager>, Arc<PluginManager>)> {
         }
     }
 
+    // return CommandManager and PluginManager
     Ok((Arc::new(command_manager), Arc::new(plugin_manager)))
 }

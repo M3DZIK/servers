@@ -6,6 +6,7 @@ use crate::plugins::CommandManagerType;
 
 use super::Client;
 
+/// Handle Client connection
 pub async fn handle_connection(
     mut client: Client,
     commands: CommandManagerType,
