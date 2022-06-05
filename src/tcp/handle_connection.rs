@@ -1,6 +1,8 @@
 use std::io::Write;
 
-use crate::CommandManagerType;
+use log::trace;
+
+use crate::plugins::CommandManagerType;
 
 use super::Client;
 
@@ -21,10 +23,11 @@ pub async fn handle_connection(
         let cmd = args[0];
 
         // search if a command exists
-        for command in commands.iter() {
+        for command in commands.commands.iter() {
             // if this is the entered command
             if cmd == command.name() {
                 // execute command
+                trace!("Executing a command `{}`", command.name());
                 command
                     .execute(&mut client, args[1..args.len()].to_vec(), &commands)
                     .await;

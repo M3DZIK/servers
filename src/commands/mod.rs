@@ -1,15 +1,9 @@
-#![allow(clippy::vec_init_then_push)]
-
 mod help;
 
 pub use help::*;
 
-use crate::command_handler::Command;
+use crate::plugins::Command;
 
 pub fn register_commands() -> Vec<Box<dyn Command>> {
-    let mut commands: Vec<Box<dyn Command>> = Vec::new();
-
-    commands.push(Box::new(CommandHelp));
-
-    commands
+    vec![Box::new(CommandHelp)]
 }

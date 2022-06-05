@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 
-use crate::{command_handler::Command, tcp::Client, CommandManagerType};
+use crate::{
+    plugins::{Command, CommandManagerType},
+    tcp::Client,
+};
 
 pub struct CommandHelp;
 
@@ -14,8 +17,13 @@ impl Command for CommandHelp {
         "show help"
     }
 
-    async fn execute(&self, client: &mut Client, _args: Vec<&str>, commands: &CommandManagerType) {
-        for command in commands.iter() {
+    async fn execute(
+        &self,
+        client: &mut Client,
+        _args: Vec<&str>,
+        command_manager: &CommandManagerType,
+    ) {
+        for command in command_manager.commands.iter() {
             client
                 .send(&format!("{} - {}", command.name(), command.help()))
                 .await

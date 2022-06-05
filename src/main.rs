@@ -1,5 +1,6 @@
 use clap::Parser;
 use servers::tcp;
+use simple_logger::SimpleLogger;
 
 #[derive(Parser)]
 #[clap(
@@ -26,6 +27,9 @@ struct Cli {
 }
 
 fn main() -> anyhow::Result<()> {
+    SimpleLogger::new().init()?;
+
+    // parse cli args
     let cli = Cli::parse();
 
     // start tcp server
