@@ -15,7 +15,7 @@ pub async fn handle_connection(
 
     loop {
         // read client message/buffer
-        let buf = client.read().await?;
+        let buf = client.read()?;
 
         // split message by whitespace
         let args: &Vec<&str> = &buf.split_ascii_whitespace().collect();

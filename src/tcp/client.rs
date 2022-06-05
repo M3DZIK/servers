@@ -16,7 +16,7 @@ impl Client {
     }
 
     /// Read message/buffer from Client
-    pub async fn read(&mut self) -> anyhow::Result<String> {
+    pub fn read(&mut self) -> anyhow::Result<String> {
         // allocate an empty buffer of length 1024 bytes
         let mut buf = [0; 1024];
 
@@ -30,7 +30,7 @@ impl Client {
     }
 
     /// Send message to Client
-    pub async fn send(&mut self, content: &str) -> io::Result<()> {
+    pub fn send(&mut self, content: &str) -> io::Result<()> {
         // add a new line at the end of the content
         let content = format!("{content}\n\r");
 

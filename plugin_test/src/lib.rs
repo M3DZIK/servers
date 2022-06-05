@@ -28,7 +28,7 @@ impl Command for PluginTest {
     }
 
     async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &CommandManagerType) {
-        client.send("content").await.expect("send message")
+        client.send("content").expect("send message")
     }
 }
 

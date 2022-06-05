@@ -26,7 +26,6 @@ impl Command for CommandHelp {
         for command in command_manager.commands.iter() {
             client
                 .send(&format!("{} - {}", command.name(), command.help()))
-                .await
                 .expect("send message");
         }
     }
