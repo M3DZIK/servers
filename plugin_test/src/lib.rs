@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 use servers::{
-    plugins::{Command, CommandManagerType, CommandRegistrar, Plugin, PluginRegistrar},
+    plugins::{
+        Command, CommandManagerType, CommandRegistrar, Event, EventRegistrar, Plugin,
+        PluginRegistrar,
+    },
     tcp::Client,
 };
 
@@ -32,8 +35,29 @@ impl Command for PluginTest {
     }
 }
 
+#[async_trait]
+impl Event for PluginTest {
+    fn name(&self) -> &'static str {
+        "onConnect"
+    }
+
+    async fn execute(&self, client: &mut Client) {
+        client
+            .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
+            .expect("send message")
+    }
+}
+
 #[no_mangle]
-pub fn plugin_entry(registrar: &mut dyn PluginRegistrar, command: &mut dyn CommandRegistrar) {
-    registrar.register_plugin(Box::new(PluginTest));
-    command.register_command(Box::new(PluginTest));
+pub fn plugin_entry(
+    plugin: &mut dyn PluginRegistrar,
+    command: &mut dyn CommandRegistrar,
+    event: &mut dyn EventRegistrar,
+) {
+    // register plugin
+    plugin.register(Box::new(PluginTest));
+    // register command
+    command.register(Box::new(PluginTest));
+    // register plugin
+    event.register(Box::new(PluginTest));
 }

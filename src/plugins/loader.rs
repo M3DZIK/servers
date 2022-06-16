@@ -21,11 +21,11 @@ pub trait Plugin: Any + Send + Sync {
 
 pub trait PluginRegistrar {
     /// Function to register the plugin
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>);
+    fn register(&mut self, plugin: Box<dyn Plugin>);
 }
 
 impl PluginRegistrar for PluginManager {
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>) {
+    fn register(&mut self, plugin: Box<dyn Plugin>) {
         self.plugins.push(plugin)
     }
 }
@@ -91,17 +91,56 @@ pub type CommandManagerType = Arc<CommandManager>;
 
 pub trait CommandRegistrar {
     /// Function to register the plugin and the commands in the plugin
-    fn register_command(&mut self, command: Box<dyn Command>);
+    fn register(&mut self, command: Box<dyn Command>);
 }
 
 impl CommandRegistrar for CommandManager {
-    fn register_command(&mut self, command: Box<dyn Command>) {
+    fn register(&mut self, command: Box<dyn Command>) {
         self.commands.push(command)
     }
 }
 
+#[async_trait]
+pub trait Event: Any + Send + Sync {
+    /// Event name (onConnect, onSend)
+    fn name(&self) -> &'static str;
+    /// Event function
+    async fn execute(&self, client: &mut Client);
+}
+
+/// Event Manager
+pub struct EventManager {
+    pub events: Vec<Box<dyn Event>>,
+}
+
+impl EventManager {
+    /// Create empty `EventManager`
+    pub fn new() -> Self {
+        Self { events: Vec::new() }
+    }
+}
+
+impl Default for EventManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub type EventManagerType = Arc<EventManager>;
+
+pub trait EventRegistrar {
+    /// Function to register the plugin and the commands in the plugin
+    fn register(&mut self, command: Box<dyn Event>);
+}
+
+impl EventRegistrar for EventManager {
+    fn register(&mut self, command: Box<dyn Event>) {
+        self.events.push(command)
+    }
+}
+
 /// Plugins and Commands loader
-pub fn loader() -> anyhow::Result<(CommandManagerType, PluginManagerType)> {
+pub fn loader() -> anyhow::Result<(CommandManagerType, PluginManagerType, EventManagerType)> {
     // get path to .so lib from command argument
     let config_dir = "./plugins";
     let paths = fs::read_dir(config_dir)?;
@@ -111,6 +150,9 @@ pub fn loader() -> anyhow::Result<(CommandManagerType, PluginManagerType)> {
 
     // create a command manager where located all commands
     let mut command_manager = CommandManager::new();
+
+    // create a command manager where located all events from plugins
+    let mut event_manager = EventManager::new();
 
     // register default commands
     for command in commands::register_commands() {
@@ -136,15 +178,27 @@ pub fn loader() -> anyhow::Result<(CommandManagerType, PluginManagerType)> {
             // get `plugin_entry` from library
             trace!("Finding symbol `plugin_entry` in `{}`", plugin_path);
             let func: Symbol<
-                unsafe extern "C" fn(&mut dyn PluginRegistrar, &mut dyn CommandRegistrar) -> (),
+                unsafe extern "C" fn(
+                    &mut dyn PluginRegistrar,
+                    &mut dyn CommandRegistrar,
+                    &mut dyn EventRegistrar,
+                ) -> (),
             > = lib.get(b"plugin_entry")?;
 
             // execute initial plugin function
             trace!("Running `plugin_entry(...)` in plugin `{}`", plugin_path);
-            func(&mut plugin_manager, &mut command_manager);
+            func(
+                &mut plugin_manager,
+                &mut command_manager,
+                &mut event_manager,
+            );
         }
     }
 
-    // return CommandManager and PluginManager
-    Ok((Arc::new(command_manager), Arc::new(plugin_manager)))
+    // return CommandManager, PluginManager and EventManager
+    Ok((
+        Arc::new(command_manager),
+        Arc::new(plugin_manager),
+        Arc::new(event_manager),
+    ))
 }
