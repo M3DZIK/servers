@@ -71,7 +71,7 @@
 //!     }
 //! }
 //!
-//! /// Register plugin and command
+//! /// Register plugin and event
 //! #[no_mangle]
 //! pub fn plugin_entry(
 //!     plugin: &mut dyn PluginRegistrar,

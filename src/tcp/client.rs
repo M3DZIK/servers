@@ -1,5 +1,6 @@
 #![allow(clippy::unused_io_amount)]
 
+/// Max size of a TCP packet
 pub const MAX_PACKET_LEN: usize = 65536;
 
 use std::{
@@ -7,8 +8,9 @@ use std::{
     net::TcpStream,
 };
 
-/// TCP Client stream
+/// TCP Client
 pub struct Client {
+    /// TCP stream of this client
     pub stream: TcpStream,
 }
 
@@ -18,7 +20,7 @@ impl Client {
         Self { stream }
     }
 
-    /// Read message/buffer from Client
+    /// Read message/buffer from client
     pub fn read(&mut self) -> anyhow::Result<String> {
         // allocate an empty buffer
         let mut buf = [0; MAX_PACKET_LEN];
@@ -26,13 +28,13 @@ impl Client {
         // read buffer from stream
         self.stream.read(&mut buf)?;
 
-        // encode &[u8] to a String and replace null spaces (empty `\0` bytes)
+        // encode &[u8] to a String and delete null bytes (empty `\0` bytes)
         let decoded = String::from_utf8(buf.to_vec())?.replace('\0', "");
 
         Ok(decoded)
     }
 
-    /// Send message to Client
+    /// Send message to client
     pub fn send(&mut self, content: &str) -> io::Result<()> {
         // add a new line at the end of the content
         let content = format!("{content}\n\r");

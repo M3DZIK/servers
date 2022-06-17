@@ -24,8 +24,16 @@ pub async fn handle_connection(
         // run `onSend` events from plugins
         check_event(&mut client, &events, "onSend").await;
 
-        // split message by whitespace
-        let args: &Vec<&str> = &buf.split_ascii_whitespace().collect();
+        // split message by whitespaces
+        let args: Vec<&str> = buf.split_ascii_whitespace().collect();
+
+        // client sent an empty buffer
+        if args.is_empty() {
+            client.send("empty buffer").expect("send message");
+
+            // don't execute the following commands because it causes panic
+            continue
+        }
 
         // get command from args
         let cmd = args[0];

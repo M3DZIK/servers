@@ -19,6 +19,7 @@ pub trait Plugin: Any + Send + Sync {
     async fn on_plugin_unload(&self);
 }
 
+/// Trait with function to register plugin.
 pub trait PluginRegistrar {
     /// Function to register the plugin
     fn register(&mut self, plugin: Box<dyn Plugin>);
@@ -32,11 +33,12 @@ impl PluginRegistrar for PluginManager {
 
 /// Plugin Manager
 pub struct PluginManager {
+    /// Vector with all loaded plugins.
     pub plugins: Vec<Box<dyn Plugin>>,
 }
 
 impl PluginManager {
-    /// Create empty `PluginManager`
+    /// Create empty `PluginManager`.
     pub fn new() -> Self {
         Self {
             plugins: Vec::new(),
@@ -50,8 +52,10 @@ impl Default for PluginManager {
     }
 }
 
+/// Plugin Manager Type
 pub type PluginManagerType = Arc<PluginManager>;
 
+/// Trait with command functions to implement on struct.
 #[async_trait]
 pub trait Command: Any + Send + Sync {
     /// Command name
@@ -69,11 +73,12 @@ pub trait Command: Any + Send + Sync {
 
 /// Command Manager
 pub struct CommandManager {
+    /// Vector with all commands.
     pub commands: Vec<Box<dyn Command>>,
 }
 
 impl CommandManager {
-    /// Create empty `CommandManager`
+    /// Create empty `CommandManager`.
     pub fn new() -> Self {
         Self {
             commands: Vec::new(),
@@ -87,10 +92,12 @@ impl Default for CommandManager {
     }
 }
 
+/// Command Manager Type
 pub type CommandManagerType = Arc<CommandManager>;
 
+/// Trait with function to register command.
 pub trait CommandRegistrar {
-    /// Function to register the plugin and the commands in the plugin
+    /// Function to register the plugin and the commands in the plugin.
     fn register(&mut self, command: Box<dyn Command>);
 }
 
@@ -100,6 +107,7 @@ impl CommandRegistrar for CommandManager {
     }
 }
 
+/// Trait with event functions to implement on struct.
 #[async_trait]
 pub trait Event: Any + Send + Sync {
     /// Event name (onConnect, onSend)
@@ -110,6 +118,7 @@ pub trait Event: Any + Send + Sync {
 
 /// Event Manager
 pub struct EventManager {
+    /// Vector with all events loaded from plugins.
     pub events: Vec<Box<dyn Event>>,
 }
 
@@ -126,10 +135,13 @@ impl Default for EventManager {
     }
 }
 
+
+/// Event Manager Type
 pub type EventManagerType = Arc<EventManager>;
 
+/// Trait with function to register event.
 pub trait EventRegistrar {
-    /// Function to register the plugin and the commands in the plugin
+    /// Function to register the plugin and the commands in the plugin.
     fn register(&mut self, command: Box<dyn Event>);
 }
 

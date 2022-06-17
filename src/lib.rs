@@ -19,6 +19,8 @@
 //!
 //! Go to [plugins](plugins) module
 
+#![warn(missing_docs)]
+
 pub mod commands;
 pub mod plugins;
 pub mod tcp;
