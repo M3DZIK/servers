@@ -3,7 +3,12 @@ members = ["plugin_test"]
 
 [package]
 name = "servers"
+description = "Simple TCP server for clients written in Rust with plugins support"
 version = "0.1.0"
+license = "MIT"
+authors = ["MedzikUser <nivua1fn@duck.com>"]
+homepage = "https://github.com/MedzikUser/servers"
+repository = "https://github.com/MedzikUser/servers.git"
 edition = "2021"
 
 [profile.release]
