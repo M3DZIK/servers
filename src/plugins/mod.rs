@@ -16,7 +16,7 @@
 //! ```toml
 //! [dependencies]
 //! async-trait = "0.1.56"
-//! servers = { path = ".." }
+//! servers = "0.1.0"
 //! ```
 //!
 //! ### Command plugin
