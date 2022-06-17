@@ -1,11 +1,16 @@
+use std::net::TcpListener;
+
 use clap::Parser;
-use servers::tcp;
+use servers::{
+    plugins::loader,
+    tcp::{handle_connection, Client},
+};
 use simple_logger::SimpleLogger;
 
 #[derive(Parser)]
 #[clap(
     name = "servers",
-    about = "Simple Tcp server that supports expansion via plugins"
+    about = "A simple TCP server for client which can be extended with plugins."
 )]
 struct Cli {
     #[clap(
@@ -34,7 +39,35 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     // start tcp server
-    tcp::start_server(&cli.host, &cli.port)?;
+    start_server(&cli.host, &cli.port)?;
 
     Ok(())
+}
+
+/// Start tcp server
+#[tokio::main]
+async fn start_server(host: &str, port: &str) -> anyhow::Result<()> {
+    // listen Tcp server
+    let listener = TcpListener::bind(format!("{host}:{port}"))?;
+
+    println!("Tcp server started at: {}", listener.local_addr()?);
+
+    // load plugins, commands and events
+    let (command_manager, _plugin_manager, event_manager) = loader()?;
+
+    // Accepts a new incoming connection from this listener.
+    while let Ok((stream, _address)) = listener.accept() {
+        let client = Client::new(stream);
+
+        // clone `CommandManager`
+        let command_manager = command_manager.clone();
+        // clone `EventManager`
+        let event_manager = event_manager.clone();
+
+        // handle client connection in new thread
+        tokio::spawn(handle_connection(client, command_manager, event_manager));
+    }
+
+    // server for a unexpectedly reason be terminated
+    panic!("Server unexpectedly terminated!")
 }

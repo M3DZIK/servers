@@ -56,6 +56,7 @@ pub async fn handle_connection(
     Ok(())
 }
 
+/// Search for a events and execute it
 async fn check_event(client: &mut Client, events: &EventManagerType, event_name: &str) {
     for event in events.events.iter() {
         // check if this event should be started

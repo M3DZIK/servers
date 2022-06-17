@@ -1,10 +1,13 @@
 #![allow(clippy::unused_io_amount)]
 
+pub const MAX_PACKET_LEN: usize = 65536;
+
 use std::{
     io::{self, Read, Write},
     net::TcpStream,
 };
 
+/// TCP Client stream
 pub struct Client {
     pub stream: TcpStream,
 }
@@ -17,8 +20,8 @@ impl Client {
 
     /// Read message/buffer from Client
     pub fn read(&mut self) -> anyhow::Result<String> {
-        // allocate an empty buffer of length 1024 bytes
-        let mut buf = [0; 1024];
+        // allocate an empty buffer
+        let mut buf = [0; MAX_PACKET_LEN];
 
         // read buffer from stream
         self.stream.read(&mut buf)?;

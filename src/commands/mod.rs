@@ -1,3 +1,5 @@
+//! Build-in commands
+
 mod help;
 
 use crate::plugins::Command;
