@@ -4,11 +4,14 @@
 [total-lines]: https://img.shields.io/tokei/lines/github/MedzikUser/servers?style=for-the-badge&logo=github&color=fede00
 [code-size]: https://img.shields.io/github/languages/code-size/MedzikUser/servers?style=for-the-badge&color=c8df52&logo=github
 [ci]: https://img.shields.io/github/workflow/status/MedzikUser/servers/Rust/main?style=for-the-badge
+[image]:https://socialify.git.ci/MedzikUser/servers/image?description=1&font=KoHo&language=1&owner=1&pattern=Circuit%20Board&theme=Light
 
 [![docs-rs]](https://servers.medzik.xyz)
 [![total-lines]](https://github.com/MedzikUser/servers)
 [![code-size]](https://github.com/MedzikUser/servers)
 [![ci]](https://github.com/MedzikUser/servers/actions/workflows/build.yml)
+
+[![image]](https://github.com/MedzikUser/servers)
 
 A simple TCP server for client written in Rust 🦀 which can be extended with plugins.
 
