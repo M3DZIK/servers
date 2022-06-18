@@ -18,7 +18,7 @@ opt-level = 'z'
 codegen-units = 1
 
 [dependencies]
-anyhow = "1.0.57"
+anyhow = "1.0.58"
 async-trait = "0.1.56"
 clap = { version = "3.2.5", features = ["derive"] }
 libloading = "0.7.3"
