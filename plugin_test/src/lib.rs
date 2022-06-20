@@ -54,7 +54,7 @@ impl Event for PluginTest {
     }
 }
 
-/// Regsiter plugin
+/// Register plugin
 #[no_mangle]
 pub fn plugin_entry(registrar: &mut dyn Registrar) {
     registrar.register_plugin(Box::new(PluginTest));
