@@ -2,8 +2,8 @@ name: Build release binaries (and publish them if this is a tag)
 
 on:
   push:
-    paths-ignore:
-      - '*.md'
+    tags:
+      - "*"
 
   workflow_dispatch:
 
