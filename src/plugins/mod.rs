@@ -23,18 +23,16 @@
 //!
 //! In file `src/lib.rs`
 //!
-//! ```
+//! ```no_run
 //! use async_trait::async_trait;
 //! use servers::{
-//!     plugins::{
-//!         Command, CommandManagerType, CommandRegistrar, EventRegistrar, Plugin,
-//!         PluginRegistrar,
-//!     },
+//!     plugins::{Command, Plugin, PluginManagerType, Registrar},
 //!     tcp::Client,
 //! };
 //!
 //! struct PluginTest;
 //!
+//! /// Create a new plugin.
 //! #[async_trait]
 //! impl Plugin for PluginTest {
 //!     /// Name of the plugin.
@@ -42,17 +40,12 @@
 //!         "test"
 //!     }
 //!
-//!     /// Function will be executed when plugin loading.
-//!     async fn on_plugin_load(&self) {
-//!         println!("Loading plugin `test`...")
-//!     }
-//!
-//!     /// Function will be executed when plugin unloading.
-//!     async fn on_plugin_unload(&self) {
-//!         println!("Unloading plugin `test`...")
-//!     }
+//!     /// A function will be executed when plugin loading.
+//!     /// Usally used for initialization.
+//!     async fn on_plugin_load(&self) {}
 //! }
 //!
+//! /// Create a new command.
 //! #[async_trait]
 //! impl Command for PluginTest {
 //!     /// Command name
@@ -60,28 +53,22 @@
 //!         "/test"
 //!     }
 //!
-//!     /// Command help message
+//!     /// Help message of the command
 //!     fn help(&self) -> &'static str {
 //!         "test command"
 //!     }
 //!
-//!     /// Function will be executed when client send command `/test`
-//!     async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &CommandManagerType) {
-//!         client.send("Message sended by `test` plugin").expect("send message")
+//!     /// Command function
+//!     async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &PluginManagerType) {
+//!         client.send("content").expect("send message")
 //!     }
 //! }
 //!
-//! /// Register plugin and event
+//! /// Regsiter plugin
 //! #[no_mangle]
-//! pub fn plugin_entry(
-//!     plugin: &mut dyn PluginRegistrar,
-//!     command: &mut dyn CommandRegistrar,
-//!     _event: &mut dyn EventRegistrar,
-//! ) {
-//!     // register plugin
-//!     plugin.register(Box::new(PluginTest));
-//!     // register command
-//!     command.register(Box::new(PluginTest));
+//! pub fn plugin_entry(registrar: &mut dyn Registrar) {
+//!     registrar.register_plugin(Box::new(PluginTest));
+//!     registrar.register_command(Box::new(PluginTest));
 //! }
 //! ```
 //!
@@ -89,18 +76,16 @@
 //!
 //! In file `src/lib.rs`
 //!
-//! ```
+//! ```no_run
 //! use async_trait::async_trait;
 //! use servers::{
-//!     plugins::{
-//!         CommandManagerType, CommandRegistrar, Event, EventRegistrar, Plugin,
-//!         PluginRegistrar,
-//!     },
+//!     plugins::{Event, Plugin, PluginManagerType, Registrar},
 //!     tcp::Client,
 //! };
 //!
 //! struct PluginTest;
 //!
+//! /// Create a new plugin.
 //! #[async_trait]
 //! impl Plugin for PluginTest {
 //!     /// Name of the plugin.
@@ -108,43 +93,32 @@
 //!         "test"
 //!     }
 //!
-//!     /// Function will be executed when plugin loading.
-//!     async fn on_plugin_load(&self) {
-//!         println!("Loading plugin `test`...")
-//!     }
-//!
-//!     /// Function will be executed when plugin unloading.
-//!     async fn on_plugin_unload(&self) {
-//!         println!("Unloading plugin `test`...")
-//!     }
+//!     /// A function will be executed when plugin loading.
+//!     /// Usally used for initialization.
+//!     async fn on_plugin_load(&self) {}
 //! }
 //!
+//! /// Create a new event
 //! #[async_trait]
 //! impl Event for PluginTest {
-//!     /// Event name (onConnect, onSend)
+//!     /// Event name (onConnect or onSend)
 //!     fn name(&self) -> &'static str {
 //!         "onConnect"
 //!     }
 //!
-//!     /// Function will be executed when client connected
-//!    async fn execute(&self, client: &mut Client) {
-//!        client
-//!            .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
-//!            .expect("send message")
+//!     /// Event function
+//!     async fn execute(&self, client: &mut Client) {
+//!         client
+//!             .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
+//!             .expect("send message")
 //!     }
 //! }
 //!
-//! /// Register plugin and command
+//! /// Regsiter plugin
 //! #[no_mangle]
-//! pub fn plugin_entry(
-//!     plugin: &mut dyn PluginRegistrar,
-//!     _command: &mut dyn CommandRegistrar,
-//!     event: &mut dyn EventRegistrar,
-//! ) {
-//!     // register plugin
-//!     plugin.register(Box::new(PluginTest));
-//!     // register event
-//!     event.register(Box::new(PluginTest));
+//! pub fn plugin_entry(registrar: &mut dyn Registrar) {
+//!     registrar.register_plugin(Box::new(PluginTest));
+//!     registrar.register_event(Box::new(PluginTest));
 //! }
 //! ```
 //!
@@ -157,5 +131,7 @@
 //! Move compiled plugin to the `plugin` directory where servers is located
 
 mod loader;
+mod types;
 
 pub use loader::*;
+pub use types::*;
