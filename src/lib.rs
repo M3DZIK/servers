@@ -19,6 +19,7 @@
 //!
 //! Go to [plugins](plugins) module
 
+#![doc(html_root_url = "https://servers.medzik.xyz")]
 #![warn(missing_docs)]
 
 pub mod commands;
