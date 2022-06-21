@@ -6,7 +6,7 @@ use servers::{
 
 struct PluginTest;
 
-/// Create a new plugin.
+/// Create a new plugin
 #[async_trait]
 impl Plugin for PluginTest {
     /// Name of the plugin.
@@ -19,7 +19,7 @@ impl Plugin for PluginTest {
     async fn on_plugin_load(&self) {}
 }
 
-/// Create a new command.
+/// Create a new command
 #[async_trait]
 impl Command for PluginTest {
     /// Command name

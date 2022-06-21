@@ -4,8 +4,8 @@ mod help;
 
 use crate::plugins::Command;
 
-/// Register default commands
+/// Register build-in commands
 pub fn register_commands() -> Vec<Box<dyn Command>> {
-    // create Vector with Commands
+    // create array with build-in commands
     vec![Box::new(help::CommandHelp)]
 }
