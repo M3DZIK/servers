@@ -52,7 +52,7 @@
 //! ```no_run
 //! use async_trait::async_trait;
 //! use servers::{
-//!     plugins::{Command, PluginManagerType, Registrar},
+//!     plugins::{Command, PluginManagerType, Registrar, Result},
 //!     tcp::Client,
 //! };
 //! #
@@ -84,8 +84,10 @@
 //!     }
 //!
 //!     /// Command function
-//!     async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &PluginManagerType) {
-//!         client.send("Command executed!").expect("send message")
+//!     async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &PluginManagerType) -> Result<()> {
+//!         client.send("Command executed!")?;
+//!
+//!         Ok(())
 //!     }
 //! }
 //!
@@ -104,7 +106,7 @@
 //! ```no_run
 //! use async_trait::async_trait;
 //! use servers::{
-//!     plugins::{Event, Registrar},
+//!     plugins::{Event, Registrar, Result},
 //!     tcp::Client,
 //! };
 //! #
@@ -131,10 +133,11 @@
 //!     }
 //!
 //!     /// Event function
-//!     async fn execute(&self, client: &mut Client) {
+//!     async fn execute(&self, client: &mut Client) -> Result<()> {
 //!         client
-//!             .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
-//!             .expect("send message")
+//!             .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))?;
+//!
+//!         Ok(())
 //!     }
 //! }
 //!

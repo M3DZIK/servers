@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use servers::{
-    plugins::{Command, Event, Plugin, PluginManagerType, Registrar},
+    plugins::{Command, Event, Plugin, PluginManagerType, Registrar, Result},
     tcp::Client,
 };
 
@@ -33,8 +33,15 @@ impl Command for PluginTest {
     }
 
     /// Command function
-    async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &PluginManagerType) {
-        client.send("content").expect("send message")
+    async fn execute(
+        &self,
+        client: &mut Client,
+        _args: Vec<&str>,
+        _commands: &PluginManagerType,
+    ) -> Result<()> {
+        client.send("content")?;
+
+        Ok(())
     }
 }
 
@@ -47,10 +54,10 @@ impl Event for PluginTest {
     }
 
     /// Event function
-    async fn execute(&self, client: &mut Client) {
-        client
-            .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
-            .expect("send message")
+    async fn execute(&self, client: &mut Client) -> Result<()> {
+        client.send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))?;
+
+        Ok(())
     }
 }
 

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 
 ## [Unreleased]
+### Features
+- **plugins**: add `Result<()>` in `fn execute()` (Event and Command traits)
 
 ## [0.1.0] - 2022-06-17
 ### Default commands

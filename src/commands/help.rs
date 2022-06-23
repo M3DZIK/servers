@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use crate::{
-    plugins::{Command, PluginManagerType},
+    plugins::{Command, PluginManagerType, Result},
     tcp::Client,
 };
 
@@ -22,11 +22,11 @@ impl Command for CommandHelp {
         client: &mut Client,
         _args: Vec<&str>,
         plugin_manager: &PluginManagerType,
-    ) {
+    ) -> Result<()> {
         for command in plugin_manager.commands.iter() {
-            client
-                .send(&format!("{} - {}", command.name(), command.help()))
-                .expect("send message");
+            client.send(&format!("{} - {}", command.name(), command.help()))?;
         }
+
+        Ok(())
     }
 }

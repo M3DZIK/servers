@@ -4,6 +4,9 @@ use async_trait::async_trait;
 
 use crate::tcp::Client;
 
+/// Custom Result alias, imported from [anyhow::Result].
+pub type Result<T> = anyhow::Result<T>;
+
 /// A plugin wich allows you to add extra functionality.
 #[async_trait]
 pub trait Plugin: Any + Send + Sync {
@@ -27,7 +30,7 @@ pub trait Command: Any + Send + Sync {
         client: &mut Client,
         args: Vec<&str>,
         plugin_manager: &PluginManagerType,
-    );
+    ) -> Result<()>;
 }
 
 /// Add a new function that will be executed when the event occurs.
@@ -36,7 +39,7 @@ pub trait Event: Any + Send + Sync {
     /// Event name (onConnect or onSend)
     fn name(&self) -> &'static str;
     /// Event function
-    async fn execute(&self, client: &mut Client);
+    async fn execute(&self, client: &mut Client) -> Result<()>;
 }
 
 /// Plugin Manager with all plugins features.
