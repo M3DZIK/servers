@@ -26,10 +26,13 @@ impl Client {
         let mut buf = [0; MAX_PACKET_LEN];
 
         // read buffer from stream
-        self.stream.read(&mut buf)?;
+        let len = self.stream.read(&mut buf)?;
 
-        // encode &[u8] to a String and delete null bytes (empty `\0` bytes)
-        let decoded = String::from_utf8(buf.to_vec())?.replace('\0', "");
+        // select only used bytes from the buffer
+        let recv_buf = &buf[0..len];
+
+        // encode buffer (&[u8]) to a String
+        let decoded = String::from_utf8(recv_buf.to_vec())?;
 
         Ok(decoded)
     }
