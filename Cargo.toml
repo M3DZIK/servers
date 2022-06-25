@@ -13,7 +13,6 @@ edition = "2021"
 
 [profile.release]
 lto = true
-panic = 'abort'
 opt-level = 'z'
 codegen-units = 1
 
@@ -21,7 +20,10 @@ codegen-units = 1
 anyhow = "1.0.58"
 async-trait = "0.1.56"
 clap = { version = "3.2.6", features = ["derive"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 libloading = "0.7.3"
-log = { version = "0.4.17", features = ["release_max_level_info", "max_level_trace"] }
+log = { version = "0.4.17", features = ["release_max_level_info", "max_level_debug"] }
 simple_logger = { version = "2.1.0", default-features = false, features = ["colors"] }
-tokio = { version = "1.19.2", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.19.2", features = ["rt-multi-thread", "macros", "net"] }
+tokio-tungstenite = "0.17.1"
+tungstenite = "0.17.2"

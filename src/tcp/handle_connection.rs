@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use log::{trace, error};
+use log::{error, trace};
 
 use crate::plugins::PluginManagerType;
 
@@ -53,8 +53,10 @@ pub async fn handle_connection(
                     Err(err) => {
                         error!("failed to execute command `{cmd}`, error message = `{err}`");
 
-                        client.send(&format!("error: {err}")).expect("send message to client");
-                    },
+                        client
+                            .send(&format!("error: {err}"))
+                            .expect("send message to client");
+                    }
                 }
 
                 // don't search for more commands
@@ -87,8 +89,10 @@ async fn check_event(client: &mut Client, events: &PluginManagerType, event_name
                 Err(err) => {
                     error!("failed to execute event `{event_name}`, error message = `{err}`");
 
-                    client.send(&format!("error: {err}")).expect("send message to client");
-                },
+                    client
+                        .send(&format!("error: {err}"))
+                        .expect("send message to client");
+                }
             }
         }
     }

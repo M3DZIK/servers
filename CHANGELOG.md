@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Features
 - **plugins**: add `Result<()>` in `fn execute()` (Event and Command traits)
+- **websocket**: WS Client <-> TCP Proxy (default port 9998) <-> TCP (default port 9999)
 
 ## [0.1.0] - 2022-06-17
 ### Default commands
