@@ -1,4 +1,4 @@
-# Servers - Simple TCP server
+# Servers - Simple TCP and WebSocket server
 
 [docs-rs]: https://img.shields.io/badge/docs.rs-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs
 [total-lines]: https://img.shields.io/tokei/lines/github/MedzikUser/servers?style=for-the-badge&logo=github&color=fede00
@@ -13,7 +13,7 @@
 
 [![image]](https://github.com/MedzikUser/servers)
 
-A simple TCP server for client written in Rust 🦀 which can be extended with plugins.
+A simple TCP server for clients and WebSocket server written in Rust 🦀 which can be extended with plugins.
 
 ## 👨‍💻 Building
 

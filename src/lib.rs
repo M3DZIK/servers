@@ -1,4 +1,4 @@
-//! # Servers - Simple TCP server
+//! # Servers - Simple TCP and WebSocket server
 //!
 //! [image]: https://socialify.git.ci/MedzikUser/servers/image?description=1&font=KoHo&language=1&owner=1&pattern=Circuit%20Board&theme=Light
 //!
