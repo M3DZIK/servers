@@ -11,24 +11,24 @@ pub async fn handle_connection(
     mut client: Client,
     plugin_manager: PluginManagerType,
 ) -> anyhow::Result<()> {
-    println!("New Client: {:?}", client.stream.peer_addr()?);
+    println!("New Client: {}", client.stream.peer_addr()?);
 
     // run `onConnect` events from plugins
-    check_event(&mut client, &plugin_manager, "onConnect").await;
+    check_event(&mut client, &plugin_manager, "onConnect").await?;
 
     loop {
         // read client message/buffer
         let buf = client.read()?;
 
         // run `onSend` events from plugins
-        check_event(&mut client, &plugin_manager, "onSend").await;
+        check_event(&mut client, &plugin_manager, "onSend").await?;
 
-        // split message by whitespaces
-        let args: Vec<&str> = buf.split_ascii_whitespace().collect();
+        // split the message by whitespaces and collect it into Vec<&str>
+        let mut args = buf.split_ascii_whitespace().collect::<Vec<&str>>();
 
         // client sent an empty buffer
         if args.is_empty() {
-            client.send("empty buffer").expect("send message");
+            client.send("empty buffer")?;
 
             // don't execute the following commands because it causes panic
             continue;
@@ -37,6 +37,9 @@ pub async fn handle_connection(
         // get command from args
         let cmd = args[0];
 
+        // remove command name from args
+        args = args[1..args.len()].to_vec();
+
         // search if a command exists
         for command in plugin_manager.commands.iter() {
             // if this is the entered command
@@ -44,18 +47,12 @@ pub async fn handle_connection(
                 trace!("Executing a command `{}`", command.name());
 
                 // execute command
-                let out = command
-                    .execute(&mut client, args[1..args.len()].to_vec(), &plugin_manager)
-                    .await;
-
-                match out {
+                match command.execute(&mut client, args, &plugin_manager).await {
                     Ok(_) => (),
                     Err(err) => {
                         error!("failed to execute command `{cmd}`, error message = `{err}`");
 
-                        client
-                            .send(&format!("error: {err}"))
-                            .expect("send message to client");
+                        client.send(&format!("error: {err}"))?;
                     }
                 }
 
@@ -75,25 +72,27 @@ pub async fn handle_connection(
 }
 
 /// Search for a events and execute it
-async fn check_event(client: &mut Client, events: &PluginManagerType, event_name: &str) {
+async fn check_event(
+    client: &mut Client,
+    events: &PluginManagerType,
+    event_name: &str,
+) -> anyhow::Result<()> {
     for event in events.events.iter() {
         // check if this event should be started
         if event.name() == event_name {
             trace!("Executing a event `{}`", event.name());
 
             // execute event
-            let out = event.execute(client).await;
-
-            match out {
+            match event.execute(client).await {
                 Ok(_) => (),
                 Err(err) => {
                     error!("failed to execute event `{event_name}`, error message = `{err}`");
 
-                    client
-                        .send(&format!("error: {err}"))
-                        .expect("send message to client");
+                    client.send(&format!("error: {err}"))?;
                 }
             }
         }
     }
+
+    Ok(())
 }
