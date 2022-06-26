@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use log::{error, trace};
+use log::{error, trace, info};
 
 use crate::plugins::PluginManagerType;
 
@@ -11,7 +11,7 @@ pub async fn handle_connection(
     mut client: Client,
     plugin_manager: PluginManagerType,
 ) -> anyhow::Result<()> {
-    println!("New Client: {}", client.stream.peer_addr()?);
+    info!("New Client: {}", client.stream.peer_addr()?);
 
     // run `onConnect` events from plugins
     check_event(&mut client, &plugin_manager, "onConnect").await?;

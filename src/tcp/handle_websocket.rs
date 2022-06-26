@@ -1,6 +1,7 @@
 #![allow(clippy::unused_io_amount)]
 
 use futures_util::{SinkExt, StreamExt};
+use log::info;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -11,6 +12,8 @@ use super::MAX_PACKET_LEN;
 
 /// Handle WebSocket connection
 pub async fn handle_websocket(stream: TcpStream, tcp_port: String) -> anyhow::Result<()> {
+    info!("New WebSocket Client: {}", stream.peer_addr()?);
+
     // accept connection as WebSocket
     let ws_stream = tokio_tungstenite::accept_async(stream).await?;
 

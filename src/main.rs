@@ -1,11 +1,12 @@
-use std::net::TcpListener;
+use std::{net::TcpListener, fs::File};
 
 use clap::Parser;
+use log::{LevelFilter, info};
 use servers::{
     plugins::loader,
     tcp::{handle_connection, handle_websocket, Client},
 };
-use simple_logger::SimpleLogger;
+use simplelog::{CombinedLogger, TermLogger, WriteLogger, Config, TerminalMode, ColorChoice};
 
 #[derive(Parser)]
 #[clap(
@@ -34,26 +35,42 @@ struct Cli {
         short = 'w',
         long = "ws-port",
         default_value = "9998",
-        help = "Websocket server port [set 0 to random]",
-        display_order = 2
+        help = "WebSocket server port [set 0 to random]",
+        display_order = 3
     )]
     ws_port: String,
+
+    #[clap(
+        long = "disable-websocket",
+        help = "Disable WebSocket proxy to Tcp",
+        display_order = 4
+    )]
+    ws_disable: bool,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // init logger
-    SimpleLogger::new().init()?;
+    CombinedLogger::init(
+        vec![
+            TermLogger::new(LevelFilter::Trace, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
+            WriteLogger::new(LevelFilter::Debug, Config::default(), File::create("server.log").unwrap()),
+        ]
+    )?;
 
     // parse cli args
     let cli = Cli::parse();
 
+    // if enabled start WebSocket server
+    if !cli.ws_disable {
+        tokio::spawn(start_ws_server(
+            cli.host.clone(),
+            cli.ws_port,
+            cli.port.clone(),
+        ));
+    }
+
     // start tcp server
-    tokio::spawn(start_ws_server(
-        cli.host.clone(),
-        cli.ws_port,
-        cli.port.clone(),
-    ));
     start_tcp_server(cli.host, cli.port).await?;
 
     Ok(())
@@ -64,7 +81,7 @@ async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
     // listen Tcp server
     let listener = TcpListener::bind(format!("{host}:{port}"))?;
 
-    println!("Tcp server started at: {}", listener.local_addr()?);
+    info!("Tcp server started at: {}", listener.local_addr()?);
 
     // load plugins, commands and events
     let plugin_manager = loader()?;
@@ -86,7 +103,7 @@ async fn start_ws_server(host: String, port: String, tcp_port: String) -> anyhow
     // listen Tcp server
     let listener = tokio::net::TcpListener::bind(format!("{host}:{port}")).await?;
 
-    println!("WebSocket server started at: {}", listener.local_addr()?);
+    info!("WebSocket server started at: {}", listener.local_addr()?);
 
     // Accepts a new incoming connection from this listener.
     while let Ok((stream, _address)) = listener.accept().await {
