@@ -25,3 +25,7 @@ First clone the repository: `git clone https://github.com/MedzikUser/servers.git
 To build run the command: `cargo build --release`
 
 The compiled binary can be found in `./target/release/servers`
+
+## Writing plugins
+
+Read the docs from [plugins](https://servers.medzik.xyz/servers/plugins) module.
