@@ -1,12 +1,12 @@
-use std::{net::TcpListener, fs::File};
+use std::{fs::File, net::TcpListener};
 
 use clap::Parser;
-use log::{LevelFilter, info};
+use log::{error, info, LevelFilter};
 use servers::{
     plugins::loader,
     tcp::{handle_connection, handle_websocket, Client},
 };
-use simplelog::{CombinedLogger, TermLogger, WriteLogger, Config, TerminalMode, ColorChoice};
+use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode, WriteLogger};
 
 #[derive(Parser)]
 #[clap(
@@ -50,13 +50,22 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // init better panic
+    better_panic::install();
     // init logger
-    CombinedLogger::init(
-        vec![
-            TermLogger::new(LevelFilter::Trace, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-            WriteLogger::new(LevelFilter::Debug, Config::default(), File::create("server.log").unwrap()),
-        ]
-    )?;
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Trace,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(
+            LevelFilter::Debug,
+            Config::default(),
+            File::create("server.log").unwrap(),
+        ),
+    ])?;
 
     // parse cli args
     let cli = Cli::parse();
@@ -89,9 +98,17 @@ async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
     // Accepts a new incoming connection from this listener.
     while let Ok((stream, _address)) = listener.accept() {
         let client = Client::new(stream);
+        let plugin_manager = plugin_manager.clone();
 
         // handle client connection in new thread
-        tokio::spawn(handle_connection(client, plugin_manager.clone()));
+        tokio::spawn(async move {
+            let ip = client.stream.peer_addr().unwrap();
+
+            match handle_connection(client, plugin_manager).await {
+                Ok(_) => (),
+                Err(err) => error!("Client {}, {}", ip, err),
+            }
+        });
     }
 
     // server for a unexpectedly reason be terminated
@@ -108,7 +125,14 @@ async fn start_ws_server(host: String, port: String, tcp_port: String) -> anyhow
     // Accepts a new incoming connection from this listener.
     while let Ok((stream, _address)) = listener.accept().await {
         let tcp_port = tcp_port.clone();
-        tokio::spawn(handle_websocket(stream, tcp_port));
+        tokio::spawn(async {
+            let ip = stream.peer_addr().unwrap();
+
+            match handle_websocket(stream, tcp_port).await {
+                Ok(_) => (),
+                Err(err) => error!("Client {}, {}", ip, err),
+            }
+        });
     }
 
     // server for a unexpectedly reason be terminated

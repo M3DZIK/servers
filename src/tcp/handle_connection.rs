@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use log::{error, trace, info};
+use log::{error, info, trace};
 
 use crate::plugins::PluginManagerType;
 
