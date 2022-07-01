@@ -1,6 +1,5 @@
-use std::io::Write;
-
 use log::{error, info, trace};
+use tokio::io::AsyncWriteExt;
 
 use crate::plugins::PluginManagerType;
 
@@ -18,7 +17,7 @@ pub async fn handle_connection(
 
     loop {
         // read client message/buffer
-        let buf = client.read()?;
+        let buf = client.read().await?;
 
         // run `onSend` events from plugins
         check_event(&mut client, &plugin_manager, "onSend").await?;
@@ -28,7 +27,7 @@ pub async fn handle_connection(
 
         // client sent an empty buffer
         if args.is_empty() {
-            client.send("empty buffer")?;
+            client.send("empty buffer").await?;
 
             // don't execute the following commands because it causes panic
             continue;
@@ -52,7 +51,7 @@ pub async fn handle_connection(
                     Err(err) => {
                         error!("failed to execute command `{cmd}`, error message = `{err}`");
 
-                        client.send(&format!("error: {err}"))?;
+                        client.send(&format!("error: {err}")).await?;
                     }
                 }
 
@@ -62,7 +61,7 @@ pub async fn handle_connection(
         }
 
         // if an I/O or EOF error, abort the connection
-        if client.stream.flush().is_err() {
+        if client.stream.flush().await.is_err() {
             // terminate connection
             break;
         }
@@ -88,7 +87,7 @@ async fn check_event(
                 Err(err) => {
                     error!("failed to execute event `{event_name}`, error message = `{err}`");
 
-                    client.send(&format!("error: {err}"))?;
+                    client.send(&format!("error: {err}")).await?;
                 }
             }
         }

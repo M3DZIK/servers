@@ -1,12 +1,9 @@
 #![allow(clippy::unused_io_amount)]
 
+use tokio::{net::TcpStream, io::{self, AsyncWriteExt, AsyncReadExt}};
+
 /// Max size of a TCP packet
 pub const MAX_PACKET_LEN: usize = 65536;
-
-use std::{
-    io::{self, Read, Write},
-    net::TcpStream,
-};
 
 /// TCP Client
 pub struct Client {
@@ -21,12 +18,12 @@ impl Client {
     }
 
     /// Read message/buffer from client
-    pub fn read(&mut self) -> anyhow::Result<String> {
+    pub async fn read(&mut self) -> anyhow::Result<String> {
         // allocate an empty buffer
         let mut buf = [0; MAX_PACKET_LEN];
 
         // read buffer from stream
-        let len = self.stream.read(&mut buf)?;
+        let len = self.stream.read(&mut buf).await?;
 
         // select only used bytes from the buffer
         let recv_buf = &buf[0..len];
@@ -38,11 +35,11 @@ impl Client {
     }
 
     /// Send message to client
-    pub fn send(&mut self, content: &str) -> io::Result<()> {
+    pub async fn send(&mut self, content: &str) -> io::Result<()> {
         // add a new line at the end of the content
         let content = format!("{content}\n\r");
 
         // send message
-        self.stream.write_all(content.as_bytes())
+        self.stream.write_all(content.as_bytes()).await
     }
 }

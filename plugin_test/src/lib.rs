@@ -39,7 +39,7 @@ impl Command for PluginTest {
         _args: Vec<&str>,
         _commands: &PluginManagerType,
     ) -> Result<()> {
-        client.send("content")?;
+        client.send("content").await?;
 
         Ok(())
     }
@@ -55,7 +55,7 @@ impl Event for PluginTest {
 
     /// Event function
     async fn execute(&self, client: &mut Client) -> Result<()> {
-        client.send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))?;
+        client.send(&format!("Welcome {}", client.stream.peer_addr().unwrap())).await?;
 
         Ok(())
     }

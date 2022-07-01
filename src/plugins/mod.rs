@@ -85,7 +85,7 @@
 //!
 //!     /// Command function
 //!     async fn execute(&self, client: &mut Client, _args: Vec<&str>, _commands: &PluginManagerType) -> Result<()> {
-//!         client.send("Command executed!")?;
+//!         client.send("Command executed!").await?;
 //!
 //!         Ok(())
 //!     }
@@ -135,7 +135,8 @@
 //!     /// Event function
 //!     async fn execute(&self, client: &mut Client) -> Result<()> {
 //!         client
-//!             .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))?;
+//!             .send(&format!("Welcome {}", client.stream.peer_addr()?))
+//!             .await?;
 //!
 //!         Ok(())
 //!     }

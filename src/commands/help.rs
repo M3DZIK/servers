@@ -24,7 +24,7 @@ impl Command for CommandHelp {
         plugin_manager: &PluginManagerType,
     ) -> Result<()> {
         for command in plugin_manager.commands.iter() {
-            client.send(&format!("{} - {}", command.name(), command.help()))?;
+            client.send(&format!("{} - {}", command.name(), command.help())).await?;
         }
 
         Ok(())

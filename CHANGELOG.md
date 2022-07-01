@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 
 ## [Unreleased]
+## Chore
+- **tcp**: use tcp from tokio instead of std
 
 ## [0.2.0] - 2022-06-26
 ### Features

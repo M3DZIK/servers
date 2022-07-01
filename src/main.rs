@@ -1,4 +1,4 @@
-use std::{fs::File, net::TcpListener};
+use std::fs::File;
 
 use clap::Parser;
 use log::{error, info, LevelFilter};
@@ -7,6 +7,7 @@ use servers::{
     tcp::{handle_connection, handle_websocket, Client},
 };
 use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode, WriteLogger};
+use tokio::net::TcpListener;
 
 #[derive(Parser)]
 #[clap(
@@ -88,7 +89,7 @@ async fn main() -> anyhow::Result<()> {
 /// Start tcp server
 async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
     // listen Tcp server
-    let listener = TcpListener::bind(format!("{host}:{port}"))?;
+    let listener = TcpListener::bind(format!("{host}:{port}")).await?;
 
     info!("Tcp server started at: {}", listener.local_addr()?);
 
@@ -96,7 +97,7 @@ async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
     let plugin_manager = loader()?;
 
     // Accepts a new incoming connection from this listener.
-    while let Ok((stream, _address)) = listener.accept() {
+    while let Ok((stream, _address)) = listener.accept().await {
         let client = Client::new(stream);
         let plugin_manager = plugin_manager.clone();
 
