@@ -1,5 +1,3 @@
-#![allow(clippy::unused_io_amount)]
-
 use tokio::{net::TcpStream, io::{self, AsyncWriteExt, AsyncReadExt}};
 
 /// Max size of a TCP packet
@@ -17,7 +15,7 @@ impl Client {
         Self { stream }
     }
 
-    /// Read message/buffer from client
+    /// Read message/buffer from the client
     pub async fn read(&mut self) -> anyhow::Result<String> {
         // allocate an empty buffer
         let mut buf = [0; MAX_PACKET_LEN];
@@ -34,7 +32,7 @@ impl Client {
         Ok(decoded)
     }
 
-    /// Send message to client
+    /// Send message to the client
     pub async fn send(&mut self, content: &str) -> io::Result<()> {
         // add a new line at the end of the content
         let content = format!("{content}\n\r");

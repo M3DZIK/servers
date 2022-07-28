@@ -1,4 +1,4 @@
-use log::{error, info, trace};
+use tracing::{error, info, trace};
 use tokio::io::AsyncWriteExt;
 
 use crate::plugins::PluginManagerType;

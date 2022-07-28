@@ -1,7 +1,7 @@
-use std::{fs, sync::Arc};
+use std::{fs, sync::Arc, path::Path};
 
 use libloading::{Library, Symbol};
-use log::{debug, trace};
+use tracing::{debug, trace};
 
 use crate::{commands, plugins::Registrar};
 
@@ -9,8 +9,14 @@ use super::{PluginManager, PluginManagerType};
 
 /// Plugins and Commands loader
 pub fn loader() -> anyhow::Result<PluginManagerType> {
-    // get path to .so lib from command argument
     let config_dir = "./plugins";
+
+    // if config directory doesn't exists, create it
+    if !Path::new(config_dir).exists() {
+        fs::create_dir_all(config_dir)?;
+    }
+
+    // get path to .so lib from command argument
     let paths = fs::read_dir(config_dir)?;
 
     // create a plugin manager
@@ -25,13 +31,11 @@ pub fn loader() -> anyhow::Result<PluginManagerType> {
     for path in paths {
         // get library file path
         let path = path?.path();
+        let plugin_path = path.to_str().unwrap();
 
-        let plugin_path = path.to_str().unwrap_or("unknown");
-
-        // log debug info
         debug!("Loading plugin `{}`", plugin_path);
 
-        // loading library with .so is unsafe
+        // loading library from .so is unsafe
         unsafe {
             // load library
             // Box::new and Box::leak must be there because if it isn't there it throws a segmentation fault

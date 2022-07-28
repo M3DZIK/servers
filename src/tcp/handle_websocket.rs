@@ -4,7 +4,7 @@ use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
-use log::info;
+use tracing::info;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{

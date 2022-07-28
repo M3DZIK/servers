@@ -1,13 +1,10 @@
-use std::fs::File;
-
 use clap::Parser;
-use log::{error, info, LevelFilter};
 use servers::{
     plugins::loader,
     tcp::{handle_connection, handle_websocket, Client},
 };
-use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode, WriteLogger};
 use tokio::net::TcpListener;
+use tracing::{info, error};
 
 #[derive(Parser)]
 #[clap(
@@ -54,19 +51,7 @@ async fn main() -> anyhow::Result<()> {
     // init better panic
     better_panic::install();
     // init logger
-    CombinedLogger::init(vec![
-        TermLogger::new(
-            LevelFilter::Trace,
-            Config::default(),
-            TerminalMode::Mixed,
-            ColorChoice::Auto,
-        ),
-        WriteLogger::new(
-            LevelFilter::Debug,
-            Config::default(),
-            File::create("server.log").unwrap(),
-        ),
-    ])?;
+    tracing_subscriber::fmt().init();
 
     // parse cli args
     let cli = Cli::parse();
