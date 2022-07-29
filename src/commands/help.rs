@@ -14,7 +14,7 @@ impl Command for CommandHelp {
     }
 
     fn help(&self) -> &'static str {
-        "show help"
+        "Display all available commands"
     }
 
     async fn execute(
@@ -23,9 +23,16 @@ impl Command for CommandHelp {
         _args: Vec<&str>,
         plugin_manager: &PluginManagerType,
     ) -> Result<()> {
+        // Vector which will contain help messages of the commands
+        let mut help = Vec::new();
+
         for command in plugin_manager.commands.iter() {
-            client.send(&format!("{} - {}", command.name(), command.help())).await?;
+            // add a help message for the command
+            help.push(format!("{} - {}", command.name(), command.help()));
         }
+
+        // send help message to the client
+        client.send(help.join("\n\r")).await?;
 
         Ok(())
     }

@@ -4,7 +4,6 @@ use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
-use tracing::info;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{
@@ -13,6 +12,7 @@ use tokio::{
     },
 };
 use tokio_tungstenite::WebSocketStream;
+use tracing::info;
 use tungstenite::Message;
 
 use super::MAX_PACKET_LEN;

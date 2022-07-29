@@ -1,7 +1,7 @@
-use std::{fs, sync::Arc, path::Path};
+use std::{fs, path::Path, sync::Arc};
 
 use libloading::{Library, Symbol};
-use tracing::{debug, trace};
+use tracing::{info, trace};
 
 use crate::{commands, plugins::Registrar};
 
@@ -33,7 +33,7 @@ pub fn loader() -> anyhow::Result<PluginManagerType> {
         let path = path?.path();
         let plugin_path = path.to_str().unwrap();
 
-        debug!("Loading plugin `{}`", plugin_path);
+        info!("Loading plugin `{}`", plugin_path);
 
         // loading library from .so is unsafe
         unsafe {
@@ -41,13 +41,16 @@ pub fn loader() -> anyhow::Result<PluginManagerType> {
             // Box::new and Box::leak must be there because if it isn't there it throws a segmentation fault
             let lib = Box::leak(Box::new(Library::new(&path)?));
 
-            // get `plugin_entry` from library
+            // get function `plugin_entry` from library
             trace!("Finding symbol `plugin_entry` in `{}`", plugin_path);
             let func: Symbol<unsafe extern "C" fn(&mut dyn Registrar) -> ()> =
                 lib.get(b"plugin_entry")?;
 
             // execute initial plugin function
-            trace!("Running `plugin_entry(...)` in plugin `{}`", plugin_path);
+            trace!(
+                "Running function `plugin_entry` from plugin `{}`",
+                plugin_path
+            );
             func(&mut plugin_manager);
         }
     }

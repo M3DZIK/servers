@@ -20,9 +20,11 @@
 //! Go to [plugins](plugins) module
 
 #![doc(html_root_url = "https://servers.medzik.xyz")]
-#![warn(missing_docs)]
 
 pub mod commands;
+pub mod logger;
+mod macros;
 pub mod plugins;
 pub mod tcp;
-mod macros;
+
+pub use async_trait::async_trait;

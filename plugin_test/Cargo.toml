@@ -7,5 +7,4 @@ edition = "2021"
 crate-type = ["dylib"]
 
 [dependencies]
-async-trait = "0.1.56"
 servers = { path = ".." }

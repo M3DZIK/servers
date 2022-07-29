@@ -1,6 +1,7 @@
 use clap::Parser;
 use cli::Cli;
 use servers::{
+    logger,
     plugins::loader,
     tcp::{handle_connection, handle_websocket, Client},
 };
@@ -11,10 +12,7 @@ mod cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // init better panic
-    better_panic::install();
-    // init logger
-    tracing_subscriber::fmt().init();
+    logger::init();
 
     // parse cli args
     let args = Cli::parse();
@@ -29,13 +27,13 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // start tcp server
-    start_tcp_server(&args.host, &args.port).await?;
+    start_tcp_server(args.host, args.port).await?;
 
     Ok(())
 }
 
 /// Start tcp server
-async fn start_tcp_server(host: &str, port: &str) -> anyhow::Result<()> {
+async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
     // listen Tcp server
     let listener = TcpListener::bind(format!("{host}:{port}")).await?;
 
@@ -51,11 +49,14 @@ async fn start_tcp_server(host: &str, port: &str) -> anyhow::Result<()> {
 
         // handle client connection in new thread
         tokio::spawn(async move {
-            let ip = client.stream.peer_addr().unwrap();
+            // get ip address of the client
+            let ip = client
+                .stream
+                .peer_addr()
+                .expect("failed to get peer address");
 
-            match handle_connection(client, plugin_manager).await {
-                Ok(_) => (),
-                Err(err) => error!("Client {}, {}", ip, err),
+            if let Err(e) = handle_connection(client, plugin_manager).await {
+                error!("Client {ip}: {e}")
             }
         });
     }
@@ -75,11 +76,11 @@ async fn start_ws_server(host: String, port: String, tcp_port: String) -> anyhow
     while let Ok((stream, _address)) = listener.accept().await {
         let tcp_port = tcp_port.clone();
         tokio::spawn(async {
-            let ip = stream.peer_addr().unwrap();
+            // get ip address of the client
+            let ip = stream.peer_addr().expect("failed to get peer address");
 
-            match handle_websocket(stream, tcp_port).await {
-                Ok(_) => (),
-                Err(err) => error!("Client {}, {}", ip, err),
+            if let Err(e) = handle_websocket(stream, tcp_port).await {
+                error!("Client {ip}: {e}")
             }
         });
     }

@@ -1,4 +1,9 @@
-use tokio::{net::TcpStream, io::{self, AsyncWriteExt, AsyncReadExt}};
+use core::fmt;
+
+use tokio::{
+    io::{self, AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+};
 
 /// Max size of a TCP packet
 pub const MAX_PACKET_LEN: usize = 65536;
@@ -33,7 +38,10 @@ impl Client {
     }
 
     /// Send message to the client
-    pub async fn send(&mut self, content: &str) -> io::Result<()> {
+    pub async fn send<S>(&mut self, content: S) -> io::Result<()>
+    where
+        S: ToString + fmt::Debug + fmt::Display,
+    {
         // add a new line at the end of the content
         let content = format!("{content}\n\r");
 

@@ -1,7 +1,6 @@
-use async_trait::async_trait;
 use servers::{
     plugins::{Command, Event, Plugin, PluginManagerType, Registrar, Result},
-    tcp::Client,
+    tcp::Client, async_trait,
 };
 
 struct PluginTest;
@@ -29,7 +28,7 @@ impl Command for PluginTest {
 
     /// Help message of the command
     fn help(&self) -> &'static str {
-        "test command"
+        "Test command from plugin"
     }
 
     /// Command function
@@ -55,7 +54,9 @@ impl Event for PluginTest {
 
     /// Event function
     async fn execute(&self, client: &mut Client) -> Result<()> {
-        client.send(&format!("Welcome {}", client.stream.peer_addr().unwrap())).await?;
+        client
+            .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
+            .await?;
 
         Ok(())
     }

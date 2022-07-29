@@ -15,15 +15,13 @@
 //!
 //! ```toml
 //! [dependencies]
-//! async-trait = "0.1.56"
-//! servers = "0.1.0"
+//! servers = { git = "https://github.com/MedzikUser/servers" }
 //! ```
 //!
 //! In file `src/lib.rs`
 //!
 //! ```no_run
-//! use async_trait::async_trait;
-//! use servers::{plugins::{Plugin, Registrar}, tcp::Client};
+//! use servers::{plugins::{Plugin, Registrar}, tcp::Client, async_trait};
 //!
 //! struct PluginTest;
 //!
@@ -50,9 +48,8 @@
 //! ## Add command
 //!
 //! ```no_run
-//! use async_trait::async_trait;
 //! use servers::{
-//!     plugins::{Command, PluginManagerType, Registrar, Result},
+//!     plugins::{Command, PluginManagerType, Registrar, Result, async_trait},
 //!     tcp::Client,
 //! };
 //! #
@@ -104,9 +101,8 @@
 //! In file `src/lib.rs`
 //!
 //! ```no_run
-//! use async_trait::async_trait;
 //! use servers::{
-//!     plugins::{Event, Registrar, Result},
+//!     plugins::{Event, Registrar, Result, async_trait},
 //!     tcp::Client,
 //! };
 //! #
