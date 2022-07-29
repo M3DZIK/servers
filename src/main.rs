@@ -1,50 +1,13 @@
 use clap::Parser;
+use cli::Cli;
 use servers::{
     plugins::loader,
     tcp::{handle_connection, handle_websocket, Client},
 };
 use tokio::net::TcpListener;
-use tracing::{info, error};
+use tracing::{error, info};
 
-#[derive(Parser)]
-#[clap(
-    name = "servers",
-    about = "A simple TCP server for client which can be extended with plugins."
-)]
-struct Cli {
-    #[clap(
-        short = 'h',
-        long = "host",
-        default_value = "0.0.0.0",
-        help = "Tcp server host",
-        display_order = 1
-    )]
-    host: String,
-    #[clap(
-        short = 'p',
-        long = "port",
-        default_value = "9999",
-        help = "Tcp server port [set 0 to random]",
-        display_order = 2
-    )]
-    port: String,
-
-    #[clap(
-        short = 'w',
-        long = "ws-port",
-        default_value = "9998",
-        help = "WebSocket server port [set 0 to random]",
-        display_order = 3
-    )]
-    ws_port: String,
-
-    #[clap(
-        long = "disable-websocket",
-        help = "Disable WebSocket proxy to Tcp",
-        display_order = 4
-    )]
-    ws_disable: bool,
-}
+mod cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -54,25 +17,25 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt().init();
 
     // parse cli args
-    let cli = Cli::parse();
+    let args = Cli::parse();
 
     // if enabled start WebSocket server
-    if !cli.ws_disable {
+    if !args.ws_disable {
         tokio::spawn(start_ws_server(
-            cli.host.clone(),
-            cli.ws_port,
-            cli.port.clone(),
+            args.host.clone(),
+            args.ws_port,
+            args.port.clone(),
         ));
     }
 
     // start tcp server
-    start_tcp_server(cli.host, cli.port).await?;
+    start_tcp_server(&args.host, &args.port).await?;
 
     Ok(())
 }
 
 /// Start tcp server
-async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
+async fn start_tcp_server(host: &str, port: &str) -> anyhow::Result<()> {
     // listen Tcp server
     let listener = TcpListener::bind(format!("{host}:{port}")).await?;
 
@@ -98,7 +61,7 @@ async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
     }
 
     // server for a unexpectedly reason be terminated
-    panic!("Server unexpectedly terminated!")
+    panic!("TCP server unexpectedly terminated!")
 }
 
 /// Start WebSocket server
@@ -122,5 +85,5 @@ async fn start_ws_server(host: String, port: String, tcp_port: String) -> anyhow
     }
 
     // server for a unexpectedly reason be terminated
-    panic!("Server unexpectedly terminated!")
+    panic!("WebSocket server unexpectedly terminated!")
 }
