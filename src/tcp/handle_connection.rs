@@ -10,7 +10,7 @@ pub async fn handle_connection(
     mut client: Client,
     plugin_manager: PluginManagerType,
 ) -> anyhow::Result<()> {
-    info!("New Client: {}", client.stream.peer_addr()?);
+    info!("New Client: {}", client.peer_addr()?);
 
     // run `onConnect` events from plugins
     check_event(&mut client, &plugin_manager, "onConnect").await?;
@@ -51,7 +51,7 @@ pub async fn handle_connection(
                     Err(err) => {
                         error!("failed to execute command `{cmd}`, error message = `{err}`");
 
-                        client.send(&format!("error: {err}")).await?;
+                        client.send(format!("error: {err}")).await?;
                     }
                 }
 
@@ -87,7 +87,7 @@ async fn check_event(
                 Err(err) => {
                     error!("failed to execute event `{event_name}`, error message = `{err}`");
 
-                    client.send(&format!("error: {err}")).await?;
+                    client.send(format!("error: {err}")).await?;
                 }
             }
         }

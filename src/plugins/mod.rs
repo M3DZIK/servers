@@ -131,7 +131,7 @@
 //!     /// Event function
 //!     async fn execute(&self, client: &mut Client) -> Result<()> {
 //!         client
-//!             .send(&format!("Welcome {}", client.stream.peer_addr()?))
+//!             .send(format!("Welcome {}", client.peer_addr()?))
 //!             .await?;
 //!
 //!         Ok(())

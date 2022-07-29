@@ -1,8 +1,9 @@
 use core::fmt;
+use std::net::SocketAddr;
 
 use tokio::{
     io::{self, AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
+    net::{TcpStream},
 };
 
 /// Max size of a TCP packet
@@ -40,12 +41,16 @@ impl Client {
     /// Send message to the client
     pub async fn send<S>(&mut self, content: S) -> io::Result<()>
     where
-        S: ToString + fmt::Debug + fmt::Display,
+        S: ToString + fmt::Display,
     {
         // add a new line at the end of the content
         let content = format!("{content}\n\r");
 
         // send message
         self.stream.write_all(content.as_bytes()).await
+    }
+
+    pub fn peer_addr(&self) -> io::Result<SocketAddr> {
+        self.stream.peer_addr()
     }
 }

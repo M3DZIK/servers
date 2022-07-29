@@ -55,7 +55,7 @@ impl Event for PluginTest {
     /// Event function
     async fn execute(&self, client: &mut Client) -> Result<()> {
         client
-            .send(&format!("Welcome {}", client.stream.peer_addr().unwrap()))
+            .send(format!("Welcome {}", client.peer_addr().unwrap()))
             .await?;
 
         Ok(())

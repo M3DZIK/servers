@@ -51,7 +51,6 @@ async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
         tokio::spawn(async move {
             // get ip address of the client
             let ip = client
-                .stream
                 .peer_addr()
                 .expect("failed to get peer address");
 
