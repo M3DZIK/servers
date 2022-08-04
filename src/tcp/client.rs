@@ -36,7 +36,7 @@ impl Client {
         let mut decoded = String::from_utf8(buf.to_vec())?;
 
         // remove new line characters
-        while decoded.ends_with("\n") || decoded.ends_with("\r") {
+        while decoded.ends_with('\n') || decoded.ends_with('\r') {
             decoded.pop();
         }
 
