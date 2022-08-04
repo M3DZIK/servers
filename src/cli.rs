@@ -2,9 +2,9 @@ use clap::Parser;
 
 #[derive(Parser)]
 #[clap(
-    name = "servers",
+    name = env!("CARGO_PKG_NAME"),
     version = env!("CARGO_PKG_VERSION"),
-    about = "A simple TCP server for client which can be extended with plugins."
+    about = env!("CARGO_PKG_DESCRIPTION"),
 )]
 pub struct Cli {
     #[clap(
@@ -35,9 +35,9 @@ pub struct Cli {
     pub ws_port: String,
 
     #[clap(
-        long = "disable-websocket",
-        help = "Disable WebSocket proxy to Tcp",
+        long = "enable-websocket",
+        help = "Enable WebSocket proxy to Tcp [default disabled]",
         display_order = 4
     )]
-    pub ws_disable: bool,
+    pub ws_enable: bool,
 }

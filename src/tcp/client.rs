@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 
 use tokio::{
     io::{self, AsyncReadExt, AsyncWriteExt},
-    net::{TcpStream},
+    net::TcpStream,
 };
 
 /// Max size of a TCP packet
@@ -30,10 +30,15 @@ impl Client {
         let len = self.stream.read(&mut buf).await?;
 
         // select only used bytes from the buffer
-        let recv_buf = &buf[0..len];
+        let buf = &buf[0..len];
 
         // encode buffer (&[u8]) to a String
-        let decoded = String::from_utf8(recv_buf.to_vec())?;
+        let mut decoded = String::from_utf8(buf.to_vec())?;
+
+        // remove new line characters
+        while decoded.ends_with("\n") || decoded.ends_with("\r") {
+            decoded.pop();
+        }
 
         Ok(decoded)
     }

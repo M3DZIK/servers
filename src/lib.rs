@@ -23,7 +23,6 @@
 
 pub mod commands;
 pub mod logger;
-mod macros;
 pub mod plugins;
 pub mod tcp;
 

@@ -1,5 +1,6 @@
+mod cli;
+
 use clap::Parser;
-use cli::Cli;
 use servers::{
     logger,
     plugins::loader,
@@ -8,7 +9,7 @@ use servers::{
 use tokio::net::TcpListener;
 use tracing::{error, info};
 
-mod cli;
+use crate::cli::Cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -18,7 +19,7 @@ async fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
 
     // if enabled start WebSocket server
-    if !args.ws_disable {
+    if args.ws_enable {
         tokio::spawn(start_ws_server(
             args.host.clone(),
             args.ws_port,
@@ -34,10 +35,10 @@ async fn main() -> anyhow::Result<()> {
 
 /// Start tcp server
 async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
-    // listen Tcp server
+    // listen TCP server
     let listener = TcpListener::bind(format!("{host}:{port}")).await?;
 
-    info!("Tcp server started at: {}", listener.local_addr()?);
+    info!("TCP server started at: {}", listener.local_addr()?);
 
     // load plugins, commands and events
     let plugin_manager = loader()?;
@@ -50,9 +51,7 @@ async fn start_tcp_server(host: String, port: String) -> anyhow::Result<()> {
         // handle client connection in new thread
         tokio::spawn(async move {
             // get ip address of the client
-            let ip = client
-                .peer_addr()
-                .expect("failed to get peer address");
+            let ip = client.peer_addr().expect("failed to get peer address");
 
             if let Err(e) = handle_connection(client, plugin_manager).await {
                 error!("Client {ip}: {e}")

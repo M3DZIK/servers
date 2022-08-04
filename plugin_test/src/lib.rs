@@ -1,6 +1,7 @@
 use servers::{
+    async_trait,
     plugins::{Command, Event, Plugin, PluginManagerType, Registrar, Result},
-    tcp::Client, async_trait,
+    tcp::Client,
 };
 
 struct PluginTest;

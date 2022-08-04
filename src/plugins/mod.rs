@@ -1,6 +1,6 @@
 //! Plugins loader
 //!
-//! # Writing a plugins
+//! # Writing plugins
 //!
 //! Create a new project `cargo new --lib plugin`
 //!
