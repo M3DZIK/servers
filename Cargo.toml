@@ -18,8 +18,8 @@ opt-level = 'z'
 codegen-units = 1
 
 [dependencies]
-anyhow = "1.0.58"
-async-trait = "0.1.56"
+anyhow = "1.0.60"
+async-trait = "0.1.57"
 better-panic = "0.3.0"
 lazy_static = "1.4.0"
 libloading = "0.7.3"
