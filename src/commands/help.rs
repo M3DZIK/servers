@@ -1,38 +1,46 @@
-use async_trait::async_trait;
+use crate::plugins::prelude::*;
 
-use crate::{
-    plugins::{Command, PluginManagerType, Result},
-    tcp::Client,
-};
-
-pub struct CommandHelp;
+pub struct Help;
 
 #[async_trait]
-impl Command for CommandHelp {
+impl Command for Help {
     fn name(&self) -> &'static str {
         "/help"
     }
 
-    fn help(&self) -> &'static str {
-        "Display all available commands"
+    fn aliases(&self) -> Vec<&'static str> {
+        vec!["/h", "/?", "?"]
     }
 
-    async fn execute(
-        &self,
-        client: &mut Client,
-        _args: Vec<&str>,
-        plugin_manager: &PluginManagerType,
-    ) -> Result<()> {
-        // Vector which will contain help messages of the commands
-        let mut help = Vec::new();
+    fn help(&self) -> &'static str {
+        "Show commands help menu"
+    }
 
-        for command in plugin_manager.commands.iter() {
-            // add a help message for the command
-            help.push(format!("{} - {}", command.name(), command.help()));
+    fn usage(&self) -> &'static str {
+        "/help"
+    }
+
+    async fn execute(&self, client: &Client, _args: Vec<&str>) -> anyhow::Result<()> {
+        let mut msg = Vec::new();
+
+        for cmd in client.plugins_manager.commands.iter() {
+            let aliases = cmd.aliases();
+
+            let aliases = if !aliases.is_empty() {
+                cmd.aliases().join(", ")
+            } else {
+                "none".to_string()
+            };
+
+            msg.push(format!(
+                "{name} - {help} (Aliases: {aliases})",
+                name = cmd.name(),
+                help = cmd.help(),
+                aliases = aliases,
+            ))
         }
 
-        // send help message to the client
-        client.send(help.join("\n\r")).await?;
+        client.send(msg.join("\n"))?;
 
         Ok(())
     }

@@ -1,20 +1,16 @@
-use std::{any::Any, sync::Arc};
+use std::any::Any;
 
 use async_trait::async_trait;
 
-use crate::tcp::Client;
+use crate::{plugins::manager::PluginsManager, tcp::Client};
 
-/// Custom Result alias, imported from [anyhow::Result].
-pub type Result<T> = anyhow::Result<T>;
-
-/// A plugin wich allows you to add extra functionality.
+// A main plugin trait.
 #[async_trait]
 pub trait Plugin: Any + Send + Sync {
     /// Name of the plugin.
     fn name(&self) -> &'static str;
-    /// A function will be executed when plugin loading.
-    /// Usally used for initialization.
-    async fn on_plugin_load(&self);
+    /// A function that will be executed when the plugin is loaded.
+    async fn on_load(&self);
 }
 
 /// Add a command to the plugin.
@@ -22,76 +18,52 @@ pub trait Plugin: Any + Send + Sync {
 pub trait Command: Any + Send + Sync {
     /// Name of the command.
     fn name(&self) -> &'static str;
+    /// Aliases for the command.
+    fn aliases(&self) -> Vec<&'static str>;
     /// Help message of the command.
     fn help(&self) -> &'static str;
-    /// Command function
-    async fn execute(
-        &self,
-        client: &mut Client,
-        args: Vec<&str>,
-        plugin_manager: &PluginManagerType,
-    ) -> Result<()>;
+    /// Usage message of the command.
+    fn usage(&self) -> &'static str;
+    /// Command function.
+    async fn execute(&self, client: &Client, args: Vec<&str>) -> anyhow::Result<()>;
 }
 
-/// Add a new function that will be executed when the event occurs.
+/// All possible to run events.
+pub enum EventType {
+    /// On client connected.
+    OnConnect,
+    /// On client sent message.
+    OnSend,
+}
+
+/// Add a event to the plugin.
 #[async_trait]
 pub trait Event: Any + Send + Sync {
-    /// Event name (onConnect or onSend)
-    fn name(&self) -> &'static str;
-    /// Event function
-    async fn execute(&self, client: &mut Client) -> Result<()>;
+    /// Type of the event.
+    fn event(&self) -> EventType;
+    /// Event function.
+    async fn execute(&self) -> anyhow::Result<()>;
 }
 
-/// Plugin Manager with all plugins features.
-pub struct PluginManager {
-    /// Array with loaded plugins.
-    pub plugins: Vec<Box<dyn Plugin>>,
-    /// Array with all commands.
-    pub commands: Vec<Box<dyn Command>>,
-    /// Array with all events.
-    pub events: Vec<Box<dyn Event>>,
-}
-
-impl PluginManager {
-    /// Create an empty [PluginManager]
-    pub fn new() -> Self {
-        Self {
-            plugins: Vec::new(),
-            commands: Vec::new(),
-            events: Vec::new(),
-        }
-    }
-}
-
-impl Default for PluginManager {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-/// Arc type of the [PluginManager].
-pub type PluginManagerType = Arc<PluginManager>;
-
-/// Plugin Registrar
 pub trait Registrar {
-    /// Function to register the plugin
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>);
-    /// Function to register the command
-    fn register_command(&mut self, command: Box<dyn Command>);
-    /// Function to register the event
-    fn register_event(&mut self, event: Box<dyn Event>);
+    /// Function to register plugins.
+    fn register_plugins(&mut self, plugin: Box<dyn Plugin>);
+    /// Function to register commands.
+    fn register_commands(&mut self, command: Box<dyn Command>);
+    /// Function to register events.
+    fn register_events(&mut self, event: Box<dyn Event>);
 }
 
-impl Registrar for PluginManager {
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>) {
+impl Registrar for PluginsManager {
+    fn register_plugins(&mut self, plugin: Box<dyn Plugin>) {
         self.plugins.push(plugin)
     }
 
-    fn register_command(&mut self, command: Box<dyn Command>) {
+    fn register_commands(&mut self, command: Box<dyn Command>) {
         self.commands.push(command)
     }
 
-    fn register_event(&mut self, event: Box<dyn Event>) {
+    fn register_events(&mut self, event: Box<dyn Event>) {
         self.events.push(event)
     }
 }

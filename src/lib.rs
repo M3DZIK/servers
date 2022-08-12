@@ -1,29 +1,14 @@
-//! # Servers - Simple TCP and WebSocket server
-//!
-//! [image]: https://socialify.git.ci/MedzikUser/servers/image?description=1&font=KoHo&language=1&owner=1&pattern=Circuit%20Board&theme=Light
-//!
-//! [![image]](https://github.com/MedzikUser/servers)
-//!
-//! ## 👨‍💻 Building
-//!
-//! First clone the repository: `git clone https://github.com/MedzikUser/servers.git`
-//!
-//! ### Requirements
-//! - Rust
-//!
-//! To build run the command: `cargo build --release`
-//!
-//! The compiled binary can be found in `./target/release/servers`
-//!
-//! ## Writing plugins
-//!
-//! Go to [plugins](plugins) module
+use std::{collections::HashMap, sync::Mutex};
 
-#![doc(html_root_url = "https://servers.medzik.xyz")]
+use lazy_static::lazy_static;
+
+use crate::tcp::Client;
 
 pub mod commands;
-pub mod logger;
 pub mod plugins;
 pub mod tcp;
 
-pub use async_trait::async_trait;
+lazy_static! {
+    pub static ref CLIENTS: Mutex<HashMap<usize, Client>> = Mutex::new(HashMap::new());
+    pub static ref CLIENT_NEXT: Mutex<usize> = Mutex::new(0);
+}

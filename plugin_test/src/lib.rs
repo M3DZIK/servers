@@ -1,72 +1,45 @@
-use servers::{
-    async_trait,
-    plugins::{Command, Event, Plugin, PluginManagerType, Registrar, Result},
-    tcp::Client,
-};
+use servers::plugins::prelude::*;
 
 struct PluginTest;
 
-/// Create a new plugin
 #[async_trait]
 impl Plugin for PluginTest {
     /// Name of the plugin.
     fn name(&self) -> &'static str {
-        "test"
+        "test_plugin"
     }
-
-    /// A function will be executed when plugin loading.
-    /// Usally used for initialization.
-    async fn on_plugin_load(&self) {}
+    /// A function that will be executed when the plugin is loaded.
+    async fn on_load(&self) {}
 }
 
-/// Create a new command
 #[async_trait]
 impl Command for PluginTest {
-    /// Command name
+    /// Name of the command.
     fn name(&self) -> &'static str {
         "/test"
     }
-
-    /// Help message of the command
+    /// Aliases for the command.
+    fn aliases(&self) -> Vec<&'static str> {
+        Vec::new()
+    }
+    /// Help message of the command.
     fn help(&self) -> &'static str {
-        "Test command from plugin"
+        "Test commend loaded from dylib"
     }
-
-    /// Command function
-    async fn execute(
-        &self,
-        client: &mut Client,
-        _args: Vec<&str>,
-        _commands: &PluginManagerType,
-    ) -> Result<()> {
-        client.send("content").await?;
+    /// Usage message of the command.
+    fn usage(&self) -> &'static str {
+        "/test"
+    }
+    /// Command function.
+    async fn execute(&self, client: &Client, _args: Vec<&str>) -> anyhow::Result<()> {
+        client.send("successful executed command from dylib")?;
 
         Ok(())
     }
 }
 
-/// Create a new event
-#[async_trait]
-impl Event for PluginTest {
-    /// Event name (onConnect or onSend)
-    fn name(&self) -> &'static str {
-        "onConnect"
-    }
-
-    /// Event function
-    async fn execute(&self, client: &mut Client) -> Result<()> {
-        client
-            .send(format!("Welcome {}", client.peer_addr().unwrap()))
-            .await?;
-
-        Ok(())
-    }
-}
-
-/// Register plugin
 #[no_mangle]
 pub fn plugin_entry(registrar: &mut dyn Registrar) {
-    registrar.register_plugin(Box::new(PluginTest));
-    registrar.register_command(Box::new(PluginTest));
-    registrar.register_event(Box::new(PluginTest));
+    registrar.register_plugins(Box::new(PluginTest));
+    registrar.register_commands(Box::new(PluginTest));
 }

@@ -1,15 +1,9 @@
-//! Build-in commands
-
 mod disconnect;
 mod help;
 
-use crate::plugins::Command;
+use self::{disconnect::Disconnect, help::Help};
+use crate::plugins::prelude::*;
 
-/// Register build-in commands
 pub fn register_commands() -> Vec<Box<dyn Command>> {
-    // create array with build-in commands
-    vec![
-        Box::new(help::CommandHelp),
-        Box::new(disconnect::CommandDisconnect),
-    ]
+    vec![Box::new(Help), Box::new(Disconnect)]
 }
