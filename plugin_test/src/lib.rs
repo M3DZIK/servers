@@ -32,9 +32,7 @@ impl Command for PluginTest {
     }
     /// Command function.
     async fn execute(&self, client: &Client, _args: Vec<&str>) -> anyhow::Result<()> {
-        client.send("successful executed command from dylib")?;
-
-        Ok(())
+        client.send("successful executed command from dylib")
     }
 }
 

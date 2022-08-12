@@ -88,11 +88,15 @@ async fn start_tcp(host: String) -> anyhow::Result<()> {
     for stream in incoming {
         let stream = stream?;
 
-        task::spawn(async {
-            let client = Client::new_tcp(stream);
+        // get id for the client
+        let id = *CLIENT_NEXT.lock().unwrap();
 
+        // add one to next id
+        *CLIENT_NEXT.lock().unwrap() += 1;
+
+        task::spawn(async move {
             // get id for the client and add one to next id
-            let id = (*CLIENT_NEXT.lock().unwrap() + 1).clone();
+            let client = Client::new_tcp(stream, id);
 
             // insert the cloned client to CLIENTS
             CLIENTS.lock().unwrap().insert(id, client.clone());
@@ -117,17 +121,20 @@ async fn start_websocket(host: String) -> anyhow::Result<()> {
     for stream in incoming {
         let stream = stream?;
 
-        task::spawn(async {
-            let client = Client::new_websocket(stream).unwrap();
+        // get id for the client
+        let id = *CLIENT_NEXT.lock().unwrap();
 
-            // get id for the client and add one to next id
-            let id = (*CLIENT_NEXT.lock().unwrap() + 1).clone();
+        // add one to next id
+        *CLIENT_NEXT.lock().unwrap() += 1;
+
+        task::spawn(async move {
+            let client = Client::new_websocket(stream, id).unwrap();
 
             // insert the cloned client to CLIENTS
             CLIENTS.lock().unwrap().insert(id, client.clone());
 
             if let Err(err) = process(client).await {
-                error!("TCP client error: {}", err);
+                error!("WebSocket client error: {}", err);
             }
 
             // delete the client from CLIENTS map

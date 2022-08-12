@@ -40,8 +40,6 @@ impl Command for Help {
             ))
         }
 
-        client.send(msg.join("\n"))?;
-
-        Ok(())
+        client.send(msg.join("\n"))
     }
 }

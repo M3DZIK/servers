@@ -1,9 +1,10 @@
 mod disconnect;
 mod help;
+mod id;
 
-use self::{disconnect::Disconnect, help::Help};
+use self::{disconnect::Disconnect, help::Help, id::ID};
 use crate::plugins::prelude::*;
 
 pub fn register_commands() -> Vec<Box<dyn Command>> {
-    vec![Box::new(Help), Box::new(Disconnect)]
+    vec![Box::new(Help), Box::new(Disconnect), Box::new(ID)]
 }

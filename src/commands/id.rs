@@ -1,26 +1,26 @@
 use crate::plugins::prelude::*;
 
-pub struct Disconnect;
+pub struct ID;
 
 #[async_trait]
-impl Command for Disconnect {
+impl Command for ID {
     fn name(&self) -> &'static str {
-        "/disconnect"
+        "/id"
     }
 
     fn aliases(&self) -> Vec<&'static str> {
-        vec!["/close", "/exit"]
+        Vec::new()
     }
 
     fn help(&self) -> &'static str {
-        "Close the connection"
+        "Get id of the client"
     }
 
     fn usage(&self) -> &'static str {
-        "/disconnect"
+        "/id"
     }
 
     async fn execute(&self, client: &Client, _args: Vec<&str>) -> anyhow::Result<()> {
-        client.close()
+        client.send(client.id)
     }
 }

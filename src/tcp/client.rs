@@ -16,6 +16,7 @@ pub const MAX_PACKET_LEN: usize = 65536;
 
 #[derive(Debug, Clone)]
 pub struct Client {
+    pub id: usize,
     pub stream: ClientStream,
     pub map: HashMap<String, ClientMapValue>,
     pub plugins_manager: PluginsManagerType,
@@ -47,6 +48,7 @@ pub enum ClientStream {
 impl From<TcpStream> for Client {
     fn from(stream: TcpStream) -> Self {
         Self {
+            id: 0,
             stream: ClientStream::TCP(Arc::new(stream)),
             map: HashMap::new(),
             plugins_manager: PLUGINS_MANAGER.clone(),
@@ -57,6 +59,7 @@ impl From<TcpStream> for Client {
 impl From<WebSocket<TcpStream>> for Client {
     fn from(stream: WebSocket<TcpStream>) -> Self {
         Self {
+            id: 0,
             stream: ClientStream::WebSocket(Arc::new(Mutex::new(stream))),
             map: HashMap::new(),
             plugins_manager: PLUGINS_MANAGER.clone(),
@@ -66,15 +69,23 @@ impl From<WebSocket<TcpStream>> for Client {
 
 impl Client {
     /// Create a new TCP Client instance
-    pub fn new_tcp(stream: TcpStream) -> Self {
-        Self::from(stream)
+    pub fn new_tcp(stream: TcpStream, id: usize) -> Self {
+        let mut client = Self::from(stream);
+
+        client.id = id;
+
+        client
     }
 
     /// Create a new WebSocket Client instance
-    pub fn new_websocket(stream: TcpStream) -> anyhow::Result<Self> {
+    pub fn new_websocket(stream: TcpStream, id: usize) -> anyhow::Result<Self> {
         let websocket = accept(stream)?;
 
-        Ok(Self::from(websocket))
+        let mut client = Self::from(websocket);
+
+        client.id = id;
+
+        Ok(client)
     }
 
     /// Recieve a message from the client
