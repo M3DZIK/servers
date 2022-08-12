@@ -1,5 +1,5 @@
 use clap::Parser;
-use servers::tcp::server;
+use servers::server;
 
 #[derive(Debug, Parser)]
 #[clap(

@@ -7,18 +7,19 @@ use tracing::{error, info};
 
 use crate::{
     plugins::{self, manager::PluginsManagerType},
-    tcp::Client,
+    server::Client,
     CLIENTS, CLIENT_NEXT,
 };
 
 pub const PLUGINS_DIR: &str = "plugins";
 
 lazy_static! {
+    /// Plugin manager, where you can find loaded plugins, commands and events
     pub static ref PLUGINS_MANAGER: PluginsManagerType =
         plugins::loader(PLUGINS_DIR).expect("failed to load plugins");
 }
 
-/// Start server
+/// Start servers
 pub fn run(tcp_host: String, ws_host: String) -> anyhow::Result<()> {
     info!("Loaded {} plugins", PLUGINS_MANAGER.plugins.len());
     info!("Loaded {} commands", PLUGINS_MANAGER.commands.len());

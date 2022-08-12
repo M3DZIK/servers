@@ -14,14 +14,20 @@ use crate::plugins::manager::PluginsManagerType;
 /// Max length of a TCP and UDP packet
 pub const MAX_PACKET_LEN: usize = 65536;
 
+/// Client struct
 #[derive(Debug, Clone)]
 pub struct Client {
+    /// ID of the client
     pub id: usize,
+    /// Connection stream of the client
     pub stream: ClientStream,
+    /// Custom Client Map
     pub map: HashMap<String, ClientMapValue>,
+    /// Plugins Manager
     pub plugins_manager: PluginsManagerType,
 }
 
+/// Value type of the client map entry
 #[derive(Debug, Clone)]
 pub enum ClientMapValue {
     /// String type
@@ -165,7 +171,7 @@ impl Client {
         Ok(())
     }
 
-    /// Close the connection
+    /// Close the client connection
     pub fn close(&self) -> anyhow::Result<()> {
         match &self.stream {
             ClientStream::TCP(stream) => stream.shutdown(Shutdown::Both)?,

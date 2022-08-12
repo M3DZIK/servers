@@ -2,7 +2,7 @@ use std::any::Any;
 
 use async_trait::async_trait;
 
-use crate::{plugins::manager::PluginsManager, tcp::Client};
+use crate::{plugins::manager::PluginsManager, server::Client};
 
 // A main plugin trait.
 #[async_trait]
