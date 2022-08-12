@@ -8,7 +8,7 @@ use std::{
 
 use tungstenite::{accept, Message, WebSocket};
 
-use super::server::PLUGINS_MANAGER;
+use super::run::PLUGINS_MANAGER;
 use crate::plugins::manager::PluginsManagerType;
 
 /// Max length of a TCP and UDP packet
