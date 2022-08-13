@@ -36,8 +36,20 @@ impl Command for PluginTest {
     }
 }
 
+#[async_trait]
+impl Event for PluginTest {
+    fn event(&self) -> EventType {
+        EventType::OnConnect
+    }
+
+    async fn execute(&self, client: &Client) -> anyhow::Result<()> {
+        client.send("Hello!")
+    }
+}
+
 #[no_mangle]
 pub fn plugin_entry(registrar: &mut dyn Registrar) {
     registrar.register_plugins(Box::new(PluginTest));
     registrar.register_commands(Box::new(PluginTest));
+    registrar.register_events(Box::new(PluginTest));
 }

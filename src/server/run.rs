@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 use tracing::{error, info};
 
 use crate::{
-    plugins::{self, manager::PluginsManagerType},
+    plugins::{self, manager::PluginsManagerType, prelude::EventType},
     server::Client,
     CLIENTS, CLIENT_NEXT,
 };
@@ -46,8 +46,14 @@ async fn process(client: Client) -> anyhow::Result<()> {
 
     info!("Processing client connection: {}", client_addr);
 
+    // run `onConnect` events
+    client.run_events(EventType::OnConnect).await?;
+
     loop {
         let buf = client.read()?;
+
+        // run `onSend` events
+        client.run_events(EventType::OnSend).await?;
 
         let mut args: Vec<&str> = buf.split_ascii_whitespace().collect();
 

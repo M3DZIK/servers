@@ -9,7 +9,7 @@ use std::{
 use tungstenite::{accept, Message, WebSocket};
 
 use super::run::PLUGINS_MANAGER;
-use crate::plugins::manager::PluginsManagerType;
+use crate::plugins::{manager::PluginsManagerType, prelude::EventType};
 
 /// Max length of a TCP and UDP packet
 pub const MAX_PACKET_LEN: usize = 65536;
@@ -110,14 +110,14 @@ impl Client {
 
                 // decode buffer (&[u8]) to a String
                 String::from_utf8(buf.to_vec())?
-            }
+            },
             ClientStream::WebSocket(stream) => {
                 // read the message from the stream
                 let msg = stream.lock().unwrap().read_message()?;
 
                 // decode message to a String
                 msg.to_string()
-            }
+            },
         };
 
         // remove new line characters
@@ -145,7 +145,7 @@ impl Client {
             ClientStream::TCP(stream) => stream.as_ref().write_all(buf)?,
             ClientStream::WebSocket(stream) => {
                 stream.lock().unwrap().write_message(Message::from(msg))?
-            }
+            },
         }
 
         Ok(())
@@ -165,7 +165,7 @@ impl Client {
     pub fn flush(&self) -> anyhow::Result<()> {
         match &self.stream {
             ClientStream::TCP(stream) => stream.as_ref().flush()?,
-            ClientStream::WebSocket(_stream) => {}
+            ClientStream::WebSocket(_stream) => {},
         }
 
         Ok(())
@@ -176,6 +176,16 @@ impl Client {
         match &self.stream {
             ClientStream::TCP(stream) => stream.shutdown(Shutdown::Both)?,
             ClientStream::WebSocket(stream) => stream.lock().unwrap().close(None)?,
+        }
+
+        Ok(())
+    }
+
+    pub async fn run_events(&self, event_type: EventType) -> anyhow::Result<()> {
+        for event in self.plugins_manager.events.iter() {
+            if event.event() == event_type {
+                event.execute(self).await?;
+            }
         }
 
         Ok(())

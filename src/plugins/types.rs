@@ -29,6 +29,7 @@ pub trait Command: Any + Send + Sync {
 }
 
 /// All possible to run events.
+#[derive(Debug, PartialEq, Eq)]
 pub enum EventType {
     /// On client connected.
     OnConnect,
@@ -42,7 +43,7 @@ pub trait Event: Any + Send + Sync {
     /// Type of the event.
     fn event(&self) -> EventType;
     /// Event function.
-    async fn execute(&self) -> anyhow::Result<()>;
+    async fn execute(&self, client: &Client) -> anyhow::Result<()>;
 }
 
 pub trait Registrar {
