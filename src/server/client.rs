@@ -27,6 +27,14 @@ pub struct Client {
     pub plugins_manager: PluginsManagerType,
 }
 
+// impl Drop for Client {
+//     fn drop(&mut self) {
+//         if let Err(err) = self.close() {
+//             error!("Failed to close client connection: {err}");
+//         }
+//     }
+// }
+
 /// Value type of the client map entry
 #[derive(Debug, Clone)]
 pub enum ClientMapValue {
@@ -154,9 +162,9 @@ impl Client {
     /// Returns the socket address of the remote peer of this connection.
     pub fn peer_addr(&self) -> anyhow::Result<SocketAddr> {
         let addr = match &self.stream {
-            ClientStream::TCP(stream) => stream.peer_addr(),
-            ClientStream::WebSocket(stream) => stream.lock().unwrap().get_ref().peer_addr(),
-        }?;
+            ClientStream::TCP(stream) => stream.peer_addr()?,
+            ClientStream::WebSocket(stream) => stream.lock().unwrap().get_ref().peer_addr()?,
+        };
 
         Ok(addr)
     }

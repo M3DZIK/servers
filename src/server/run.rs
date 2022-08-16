@@ -3,7 +3,7 @@ use std::net::TcpListener;
 use async_std::task;
 use futures::join;
 use lazy_static::lazy_static;
-use tracing::{error, info};
+use tracing::{error, info, span, Level};
 
 use crate::{
     plugins::{self, manager::PluginsManagerType, prelude::EventType},
@@ -58,7 +58,7 @@ async fn process(client: Client) -> anyhow::Result<()> {
         let mut args: Vec<&str> = buf.split_ascii_whitespace().collect();
 
         // if client sent an empty buffer
-        if buf.is_empty() {
+        if args.is_empty() {
             client.send("empty buffer")?;
             continue;
         }
@@ -108,8 +108,12 @@ async fn start_tcp(host: String) -> anyhow::Result<()> {
             // insert the cloned client to CLIENTS
             CLIENTS.lock().unwrap().insert(id, client.clone());
 
+            // add span to logger
+            let span = span!(Level::ERROR, "TCP", id = client.id);
+            let _enter = span.enter();
+
             if let Err(err) = process(client).await {
-                error!("TCP client error: {}", err);
+                error!("{}", err);
             }
 
             // delete the client from CLIENTS map
@@ -140,8 +144,12 @@ async fn start_websocket(host: String) -> anyhow::Result<()> {
             // insert the cloned client to CLIENTS
             CLIENTS.lock().unwrap().insert(id, client.clone());
 
+            // add span to logger
+            let span = span!(Level::ERROR, "UDP", id = client.id);
+            let _enter = span.enter();
+
             if let Err(err) = process(client).await {
-                error!("WebSocket client error: {}", err);
+                error!("{}", err);
             }
 
             // delete the client from CLIENTS map

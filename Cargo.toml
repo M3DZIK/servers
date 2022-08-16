@@ -4,10 +4,12 @@ resolver = "2"
 
 [package]
 name = "servers"
+description = "TCP and WebSocket server for Clients written in Rust"
+homepage = "https://github.com/MedzikUser/servers"
+repository = "https://github.com/MedzikUser/servers.git"
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.61"
