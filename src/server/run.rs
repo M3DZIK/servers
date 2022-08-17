@@ -90,15 +90,16 @@ async fn process(client: Client) -> anyhow::Result<()> {
             // to block a command return error in the `onCommand` event
             if let Some((_i, cmd)) = command {
                 // run `onCommand` events
-                if let Ok(_) = client
+                if client
                     .run_events(
                         EventType::OnCommand,
                         EventData::Command(cmd.name().to_string()),
                     )
                     .await
+                    .is_ok()
                 {
                     // execute command
-                    cmd.execute(&client, args).await?;
+                    cmd.execute(client, args).await?;
                 }
             } else {
                 client.send("unknown command")?;

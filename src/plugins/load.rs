@@ -1,7 +1,8 @@
 use std::{fs, path::Path, sync::Arc};
 
+use async_std::task;
 use libloading::{Library, Symbol};
-use tracing::{info, trace};
+use tracing::{info, span, trace, Level};
 
 use crate::{
     commands,
@@ -30,6 +31,10 @@ pub fn loader(plugins_dir: &str) -> anyhow::Result<PluginsManagerType> {
         let path = plugin_path?.path();
         let path_str = path.to_str().unwrap();
 
+        // add span to logger
+        let span = span!(Level::TRACE, "", plugin_path = path_str);
+        let _enter = span.enter();
+
         info!("Loading plugin {}", path_str);
 
         // loading library from .so is unsafe
@@ -46,6 +51,12 @@ pub fn loader(plugins_dir: &str) -> anyhow::Result<PluginsManagerType> {
             trace!("Running function `plugin_entry` from plugin {}", path_str);
             func(&mut plugins_manager);
         }
+    }
+
+    for plugin in plugins_manager.plugins.iter() {
+        // execute the `on_load` function from the plugin
+        task::block_on(async { plugin.on_load().await });
+        info!("Loaded plugin {}.", plugin.name());
     }
 
     Ok(Arc::new(plugins_manager))
