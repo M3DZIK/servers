@@ -29,12 +29,23 @@ pub trait Command: Any + Send + Sync {
 }
 
 /// All possible to run events.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventType {
     /// On client connected.
     OnConnect,
     /// On client sent message.
     OnSend,
+    /// Event executed before command execute (e.g. for disable command).
+    OnCommand,
+}
+
+/// All possible to run events.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum EventData {
+    /// for `onCommand` event
+    Command(String),
+    /// No data
+    None,
 }
 
 /// Add a event to the plugin.
@@ -43,7 +54,7 @@ pub trait Event: Any + Send + Sync {
     /// Type of the event.
     fn event(&self) -> EventType;
     /// Event function.
-    async fn execute(&self, client: &Client) -> anyhow::Result<()>;
+    async fn execute(&self, client: &Client, data: EventData) -> anyhow::Result<()>;
 }
 
 pub trait Registrar {

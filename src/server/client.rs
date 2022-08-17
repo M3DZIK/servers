@@ -9,7 +9,10 @@ use std::{
 use tungstenite::{accept, Message, WebSocket};
 
 use super::run::PLUGINS_MANAGER;
-use crate::plugins::{manager::PluginsManagerType, prelude::EventType};
+use crate::plugins::{
+    manager::PluginsManagerType,
+    prelude::{EventData, EventType},
+};
 
 /// Max length of a TCP and UDP packet
 pub const MAX_PACKET_LEN: usize = 65536;
@@ -208,10 +211,14 @@ impl Client {
         self.map.lock().unwrap().remove(&key.to_string())
     }
 
-    pub async fn run_events(&self, event_type: EventType) -> anyhow::Result<()> {
+    pub async fn run_events(
+        &self,
+        event_type: EventType,
+        event_data: EventData,
+    ) -> anyhow::Result<()> {
         for event in self.plugins_manager.events.iter() {
             if event.event() == event_type {
-                event.execute(self).await?;
+                event.execute(self, event_data.clone()).await?;
             }
         }
 

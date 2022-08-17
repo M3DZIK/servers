@@ -6,7 +6,11 @@ use lazy_static::lazy_static;
 use tracing::{error, info, span, Level};
 
 use crate::{
-    plugins::{self, manager::PluginsManagerType, prelude::EventType},
+    plugins::{
+        self,
+        manager::PluginsManagerType,
+        prelude::{EventData, EventType},
+    },
     server::Client,
     CLIENTS, CLIENT_NEXT,
 };
@@ -47,40 +51,66 @@ async fn process(client: Client) -> anyhow::Result<()> {
     info!("Processing client connection: {}", client_addr);
 
     // run `onConnect` events
-    client.run_events(EventType::OnConnect).await?;
+    client
+        .run_events(EventType::OnConnect, EventData::None)
+        .await?;
 
     loop {
         let buf = client.read()?;
 
-        // run `onSend` events
-        client.run_events(EventType::OnSend).await?;
+        // functions for error handling see `if` below function
+        async fn handle(client: &Client, buf: String) -> anyhow::Result<()> {
+            // run `onSend` events
+            client
+                .run_events(EventType::OnSend, EventData::None)
+                .await?;
 
-        let mut args: Vec<&str> = buf.split_ascii_whitespace().collect();
+            let mut args: Vec<&str> = buf.split_ascii_whitespace().collect();
 
-        // if client sent an empty buffer
-        if args.is_empty() {
-            client.send("empty buffer")?;
-            continue;
+            // if client sent an empty buffer
+            if args.is_empty() {
+                client.send("empty buffer")?;
+                return Ok(());
+            }
+
+            let cmd = args[0];
+
+            // remove command name from args
+            args = args[1..args.len()].to_vec();
+
+            // find command
+            let command = client
+                .plugins_manager
+                .commands
+                .iter()
+                .enumerate()
+                .find(|&(_i, command)| command.name() == cmd || command.aliases().contains(&cmd));
+
+            // execute command, if command isn't blocked
+            // to block a command return error in the `onCommand` event
+            if let Some((_i, cmd)) = command {
+                // run `onCommand` events
+                if let Ok(_) = client
+                    .run_events(
+                        EventType::OnCommand,
+                        EventData::Command(cmd.name().to_string()),
+                    )
+                    .await
+                {
+                    // execute command
+                    cmd.execute(&client, args).await?;
+                }
+            } else {
+                client.send("unknown command")?;
+            }
+
+            Ok(())
         }
 
-        let cmd = args[0];
-
-        // remove command name from args
-        args = args[1..args.len()].to_vec();
-
-        // find command
-        let command = client
-            .plugins_manager
-            .commands
-            .iter()
-            .enumerate()
-            .find(|&(_i, command)| command.name() == cmd || command.aliases().contains(&cmd));
-
-        // execute command
-        if let Some((_i, cmd)) = command {
-            cmd.execute(&client, args).await?;
-        } else {
-            client.send("unknown command")?;
+        // handle errors from message processing
+        if let Err(err) = handle(&client, buf).await {
+            error!("Unexpected error in message handler: {}", err);
+            client.send("Unexpected error")?;
         }
 
         client.flush()?;

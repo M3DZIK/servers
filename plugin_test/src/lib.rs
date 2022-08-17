@@ -42,7 +42,7 @@ impl Event for PluginTest {
         EventType::OnConnect
     }
 
-    async fn execute(&self, client: &Client) -> anyhow::Result<()> {
+    async fn execute(&self, client: &Client, _data: EventData) -> anyhow::Result<()> {
         client.send("Hello!")
     }
 }
