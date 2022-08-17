@@ -22,7 +22,7 @@ pub struct Client {
     /// Connection stream of the client
     pub stream: ClientStream,
     /// Custom Client Map
-    pub map: HashMap<String, ClientMapValue>,
+    pub map: Arc<Mutex<HashMap<String, ClientMapValue>>>,
     /// Plugins Manager
     pub plugins_manager: PluginsManagerType,
 }
@@ -38,15 +38,10 @@ pub struct Client {
 /// Value type of the client map entry
 #[derive(Debug, Clone)]
 pub enum ClientMapValue {
-    /// String type
     String(String),
-    /// Vector with String type
     Array(Vec<String>),
-    /// bool type
     Bool(bool),
-    /// isize type
     Int(isize),
-    /// usize type
     UInt(usize),
 }
 
@@ -64,7 +59,7 @@ impl From<TcpStream> for Client {
         Self {
             id: 0,
             stream: ClientStream::TCP(Arc::new(stream)),
-            map: HashMap::new(),
+            map: Arc::new(Mutex::new(HashMap::new())),
             plugins_manager: PLUGINS_MANAGER.clone(),
         }
     }
@@ -75,7 +70,7 @@ impl From<WebSocket<TcpStream>> for Client {
         Self {
             id: 0,
             stream: ClientStream::WebSocket(Arc::new(Mutex::new(stream))),
-            map: HashMap::new(),
+            map: Arc::new(Mutex::new(HashMap::new())),
             plugins_manager: PLUGINS_MANAGER.clone(),
         }
     }
@@ -187,6 +182,30 @@ impl Client {
         }
 
         Ok(())
+    }
+
+    /// Inserts a key-value pair into the map.
+    pub fn insert_key<S>(&self, key: S, value: ClientMapValue) -> Option<ClientMapValue>
+    where
+        S: ToString,
+    {
+        self.map.lock().unwrap().insert(key.to_string(), value)
+    }
+
+    /// Returns the value from the key.
+    pub fn get_value<S>(&self, key: S) -> Option<ClientMapValue>
+    where
+        S: ToString,
+    {
+        self.map.lock().unwrap().get(&key.to_string()).cloned()
+    }
+
+    /// Delete key from the map.
+    pub fn delete_key<S>(&self, key: S) -> Option<ClientMapValue>
+    where
+        S: ToString,
+    {
+        self.map.lock().unwrap().remove(&key.to_string())
     }
 
     pub async fn run_events(&self, event_type: EventType) -> anyhow::Result<()> {

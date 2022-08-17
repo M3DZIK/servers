@@ -12,5 +12,5 @@ pub mod prelude {
     pub use async_trait::async_trait;
 
     pub use self::types::*;
-    pub use crate::server::Client;
+    pub use crate::server::{Client, ClientMapValue};
 }
