@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "servers"
-version = "0.5.0"
+version = "0.6.0"
 description = "TCP and WebSocket server for Clients written in Rust"
 homepage = "https://github.com/MedzikUser/servers"
 repository = "https://github.com/MedzikUser/servers.git"
