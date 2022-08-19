@@ -1,9 +1,9 @@
 use crate::plugins::prelude::*;
 
-pub struct ID;
+pub struct Id;
 
 #[async_trait]
-impl Command for ID {
+impl Command for Id {
     fn name(&self) -> &'static str {
         "/id"
     }
