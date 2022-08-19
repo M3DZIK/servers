@@ -17,7 +17,7 @@ use servers::server::MAX_PACKET_LEN;
 struct Cli {
     #[clap(
         short = 'i',
-        long = "--host",
+        long = "host",
         help = "Server host",
         default_value = "0.0.0.0",
         display_order = 1
@@ -26,7 +26,7 @@ struct Cli {
 
     #[clap(
         short = 'p',
-        long = "--port",
+        long = "port",
         help = "Server port",
         default_value = "9999",
         display_order = 2
