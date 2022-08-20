@@ -23,7 +23,7 @@ impl Command for Broadcast {
     }
 
     async fn execute(&self, client: &Client, args: Vec<&str>) -> anyhow::Result<()> {
-        if args.len() < 1 || args.join(" ").is_empty() {
+        if args.is_empty() || args.join(" ").is_empty() {
             client.send("Missing message")?;
             return Ok(());
         }
