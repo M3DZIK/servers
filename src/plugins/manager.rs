@@ -3,6 +3,10 @@ use std::sync::Arc;
 
 use crate::plugins::prelude::*;
 
+/// Plugins manager struct with Clone derive added by Arc.
+pub type PluginsManagerType = Arc<PluginsManager>;
+
+/// A plugins manager that stores all plugins, commands and events.
 #[derive(Default)]
 pub struct PluginsManager {
     /// Vector with all loaded plugins.
@@ -14,13 +18,18 @@ pub struct PluginsManager {
 }
 
 impl PluginsManager {
-    /// Returns an empty PluginsManager
-    pub fn new() -> PluginsManager {
+    /// Returns an empty instance of [PluginsManager]
+    pub fn new() -> Self {
         Self {
             plugins: Vec::new(),
             commands: Vec::new(),
             events: Vec::new(),
         }
+    }
+
+    /// Returns the instance in [PluginsManagerType].
+    pub fn into(self) -> PluginsManagerType {
+        Arc::new(self)
     }
 }
 
@@ -33,5 +42,3 @@ impl fmt::Debug for PluginsManager {
             .finish()
     }
 }
-
-pub type PluginsManagerType = Arc<PluginsManager>;

@@ -10,8 +10,8 @@ use tungstenite::{accept, Message, WebSocket};
 
 use super::run::PLUGINS_MANAGER;
 use crate::plugins::{
-    manager::PluginsManagerType,
     prelude::{EventData, EventType},
+    PluginsManagerType,
 };
 
 /// Max length of a TCP and UDP packet

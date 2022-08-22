@@ -1,3 +1,11 @@
+//! Default servers commands.
+//!
+//! List of commands:
+//! - /broadcast
+//! - /disconnect
+//! - /help
+//! - /id
+
 mod broadcast;
 mod disconnect;
 mod help;

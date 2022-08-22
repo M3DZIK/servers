@@ -1,10 +1,12 @@
+//! Types used for creating plugins.
+
 use std::any::Any;
 
 use async_trait::async_trait;
 
 use crate::{plugins::manager::PluginsManager, server::Client};
 
-// A main plugin trait.
+/// A main plugin trait.
 #[async_trait]
 pub trait Plugin: Any + Send + Sync {
     /// Name of the plugin.
@@ -57,6 +59,7 @@ pub trait Event: Any + Send + Sync {
     async fn execute(&self, client: &Client, data: EventData) -> anyhow::Result<()>;
 }
 
+/// A plugin registrar trait.
 pub trait Registrar {
     /// Function to register plugins.
     fn register_plugins(&mut self, plugin: Box<dyn Plugin>);

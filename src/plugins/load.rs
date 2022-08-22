@@ -1,4 +1,4 @@
-use std::{fs, path::Path, sync::Arc};
+use std::{fs, path::Path};
 
 use async_std::task;
 use libloading::{Library, Symbol};
@@ -12,6 +12,7 @@ use crate::{
     },
 };
 
+/// Load all plugins, commands and events.
 pub fn loader(plugins_dir: &str) -> anyhow::Result<PluginsManagerType> {
     // if plugins directory doesn't exists, create it
     if !Path::new(plugins_dir).exists() {
@@ -24,7 +25,7 @@ pub fn loader(plugins_dir: &str) -> anyhow::Result<PluginsManagerType> {
     // init a plugins manager
     let mut plugins_manager = PluginsManager::new();
 
-    // add default commands
+    // register default commands
     plugins_manager.commands = commands::register_commands();
 
     for plugin_path in plugins_files {
@@ -59,5 +60,5 @@ pub fn loader(plugins_dir: &str) -> anyhow::Result<PluginsManagerType> {
         info!("Loaded plugin {}.", plugin.name());
     }
 
-    Ok(Arc::new(plugins_manager))
+    Ok(plugins_manager.into())
 }

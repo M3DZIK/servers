@@ -1,3 +1,5 @@
+//! Server infrastructure.
+
 mod client;
 mod run;
 

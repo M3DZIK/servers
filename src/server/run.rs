@@ -8,13 +8,14 @@ use tracing::{error, info, span, Level};
 use crate::{
     plugins::{
         self,
-        manager::PluginsManagerType,
         prelude::{EventData, EventType},
+        PluginsManagerType,
     },
     server::Client,
     CLIENTS, CLIENT_NEXT,
 };
 
+/// Plugins directory.
 pub const PLUGINS_DIR: &str = "plugins";
 
 lazy_static! {
