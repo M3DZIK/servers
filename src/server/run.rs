@@ -1,5 +1,6 @@
-use std::net::TcpListener;
+use std::{net::TcpListener, thread};
 
+use anyhow::anyhow;
 use async_std::task;
 use futures::join;
 use lazy_static::lazy_static;
@@ -111,8 +112,15 @@ async fn process(client: Client) -> anyhow::Result<()> {
 
         // handle errors from message processing
         if let Err(err) = handle(&client, buf).await {
-            error!("Unexpected error in message handler: {}", err);
-            client.send("Unexpected error")?;
+            let err = err.to_string();
+
+            // client disconnect e.g. using ctrl + c
+            if err.contains("Broken pipe") {
+                return Err(anyhow!("disconnected"));
+            } else {
+                error!("Unexpected error in message handler: {}", err);
+                client.send("Unexpected error")?;
+            }
         }
 
         client.flush()?;
@@ -133,7 +141,7 @@ async fn start_tcp(host: String) -> anyhow::Result<()> {
         // add one to next id
         *CLIENT_NEXT.lock().unwrap() += 1;
 
-        task::spawn(async move {
+        thread::spawn(move || {
             // get id for the client and add one to next id
             let client = Client::new_tcp(stream, id);
 
@@ -144,8 +152,15 @@ async fn start_tcp(host: String) -> anyhow::Result<()> {
             let span = span!(Level::ERROR, "TCP", id = client.id);
             let _enter = span.enter();
 
-            if let Err(err) = process(client).await {
-                error!("{}", err);
+            if let Err(err) = task::block_on(process(client)) {
+                let err = err.to_string();
+
+                // client disconnect e.g. using ctrl + c
+                if err == "disconnected" {
+                    info!("Client disconnected")
+                } else {
+                    error!("{}", err);
+                }
             }
 
             // delete the client from CLIENTS map
@@ -170,18 +185,27 @@ async fn start_websocket(host: String) -> anyhow::Result<()> {
         // add one to next id
         *CLIENT_NEXT.lock().unwrap() += 1;
 
-        task::spawn(async move {
+        thread::spawn(move || {
             let client = Client::new_websocket(stream, id).unwrap();
 
             // insert the cloned client to CLIENTS
             CLIENTS.lock().unwrap().insert(id, client.clone());
 
             // add span to logger
-            let span = span!(Level::ERROR, "UDP", id = client.id);
+            let span = span!(Level::ERROR, "WS", id = client.id);
             let _enter = span.enter();
 
-            if let Err(err) = process(client).await {
-                error!("{}", err);
+            if let Err(err) = task::block_on(process(client)) {
+                let err = err.to_string();
+
+                // client disconnect e.g. using ctrl + c
+                if err == "disconnected"
+                    || err.contains("Connection reset without closing handshake")
+                {
+                    info!("Client disconnected")
+                } else {
+                    error!("{}", err);
+                }
             }
 
             // delete the client from CLIENTS map

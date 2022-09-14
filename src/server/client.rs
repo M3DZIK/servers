@@ -6,6 +6,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use tracing::info;
 use tungstenite::{accept, Message, WebSocket};
 
 use super::run::PLUGINS_MANAGER;
@@ -131,6 +132,8 @@ impl Client {
             msg.pop();
         }
 
+        info!("[Recieved]: {}", msg);
+
         Ok(msg)
     }
 
@@ -150,9 +153,11 @@ impl Client {
         match &self.stream {
             ClientStream::TCP(stream) => stream.as_ref().write_all(buf)?,
             ClientStream::WebSocket(stream) => {
-                stream.lock().unwrap().write_message(Message::from(msg))?
+                stream.lock().unwrap().write_message(Message::from(buf))?
             },
         }
+
+        info!("[Sent]: {}", msg);
 
         Ok(())
     }
